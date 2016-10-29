@@ -1,0 +1,9 @@
+{
+  "name": "PathWizard",
+  "version": "0.0.1",
+  "description": "A lightweight tool for returning absolute or relative path strings based on the shortest unique path.",
+  "main": "app.js",
+  "keywords": [],
+  "author": "@clocasto",
+  "license": "ISC"
+}
