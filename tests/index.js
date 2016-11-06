@@ -94,34 +94,35 @@ describe('PathWizard Testing', function() {
 
   describe('Absolute Path Finding', function() {
 
-    const pw = PathWizard(path.join(__dirname, 'test-folder'));
+    let pw = PathWizard(path.join(__dirname, 'test-folder'));
 
     describe('File matching', function() {
+
+	  describe('Invalid Arguments', function() {
+
+	  	it('Throws an error when an invalid argument is provided', function() {
+	  		expect(pw.abs.bind(null,'')).to.throw(Error);
+	  		expect(pw.abs.bind(null)).to.throw(Error);
+	  		expect(pw.abs.bind(null,'{path: `${_root_indexjs}`}')).to.throw(Error);
+	  	})
+
+	  })
 
       describe('Root directory', function() {
 
         it(`Finds './index.js' from various search expressions`, function() {
-          expect(pw.abs('index.js'))
-            .to.eql(_root_indexjs);
-          expect(pw.abs('index'))
-            .to.eql(_root_indexjs);
-          expect(pw.abs('/'))
-            .to.eql(_root_indexjs);
-          expect(pw.abs('./index'))
-            .to.eql(_root_indexjs);
-          expect(pw.abs('./index.js'))
-            .to.eql(_root_indexjs);
+          expect(pw.abs('index.js')).to.eql(_root_indexjs);
+          expect(pw.abs('index')).to.eql(_root_indexjs);
+          expect(pw.abs('/')).to.eql(_root_indexjs);
+          expect(pw.abs('./index')).to.eql(_root_indexjs);
+          expect(pw.abs('./index.js')).to.eql(_root_indexjs);
         })
 
         it(`Finds './app.js' from various search expressions`, function() {
-          expect(pw.abs('app.js'))
-            .to.eql(_root_appjs);
-          expect(pw.abs('app'))
-            .to.eql(_root_appjs);
-          expect(pw.abs('./app'))
-            .to.eql(_root_appjs);
-          expect(pw.abs('./app.js'))
-            .to.eql(_root_appjs);
+          expect(pw.abs('app.js')).to.eql(_root_appjs);
+          expect(pw.abs('app')).to.eql(_root_appjs);
+          expect(pw.abs('./app')).to.eql(_root_appjs);
+          expect(pw.abs('./app.js')).to.eql(_root_appjs);
         })
 
       })
@@ -129,60 +130,74 @@ describe('PathWizard Testing', function() {
       describe('Nested directories', function() {
 
         it(`Finds './a/test.js' from various search expressions`, function() {
-          expect(pw.abs('a/test.js'))
-            .to.eql(_root_a_testjs);
-          expect(pw.abs('./a/test.js'))
-            .to.eql(_root_a_testjs);
-          expect(pw.abs('a/test'))
-            .to.eql(_root_a_testjs);
-          expect(pw.abs('a/test.js'))
-            .to.eql(_root_a_testjs);
-          expect(pw.abs('./a/test'))
-            .to.eql(_root_a_testjs);
-          expect(pw.abs('./a/test.js'))
-            .to.eql(_root_a_testjs);
+          expect(pw.abs('a/test.js')).to.eql(_root_a_testjs);
+          expect(pw.abs('./a/test.js')).to.eql(_root_a_testjs);
+          expect(pw.abs('a/test')).to.eql(_root_a_testjs);
+          expect(pw.abs('a/test.js')).to.eql(_root_a_testjs);
+          expect(pw.abs('./a/test')).to.eql(_root_a_testjs);
+          expect(pw.abs('./a/test.js')).to.eql(_root_a_testjs);
         })
 
         it(`Finds './b/b.js' from various search expressions`, function() {
-          // expect(pw.abs('app.js'))
-          //   .to.eql(_root_appjs);
-          // expect(pw.abs('app'))
-          //   .to.eql(_root_appjs);
-          // expect(pw.abs('./app'))
-          //   .to.eql(_root_appjs);
-          // expect(pw.abs('./app.js'))
-          //   .to.eql(_root_appjs);
+          expect(pw.abs('b')).to.eql(_root_b_bjs);
+	      expect(pw.abs('b.js')).to.eql(_root_b_bjs);
+	      expect(pw.abs('b/b')).to.eql(_root_b_bjs);
+	      expect(pw.abs('b/b.js')).to.eql(_root_b_bjs);
+	      expect(pw.abs('./b/b')).to.eql(_root_b_bjs);
+	      expect(pw.abs('./b/b.js')).to.eql(_root_b_bjs);
         })
 
         it(`Finds './c/c/c.js' from various search expressions`, function() {
-          // expect(pw.abs('index.js'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('index'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('/'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('./index'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('./index.js'))
-          //   .to.eql(_root_indexjs);
+          expect(pw.abs('c')).to.eql(_root_c_c_cjs);
+	      expect(pw.abs('c.js')).to.eql(_root_c_c_cjs);
+	      expect(pw.abs('c/c')).to.eql(_root_c_c_cjs);
+	      expect(pw.abs('c/c.js')).to.eql(_root_c_c_cjs);
+	      expect(pw.abs('c/c/c')).to.eql(_root_c_c_cjs);
+	      expect(pw.abs('c/c/c.js')).to.eql(_root_c_c_cjs);
+	      expect(pw.abs('./c/c/c.js')).to.eql(_root_c_c_cjs);
+	      expect(pw.abs('./c/c/c')).to.eql(_root_c_c_cjs);
+        })
+
+        it(`Chooses '{{directory}}.js' over '{{directory}}/index.js'`, function() {
+        	expect(pw.abs('c')).to.eql(_root_c_c_cjs);
+        })
+
+        it(`Throws an error when non-unique search expressions are given'`, function() {
+        	const _root_b_b_indexjs = path.join(_root_b_b, 'index.js');
+        	fse.writeFileSync(_root_b_b_indexjs, `${_root_b_b_indexjs}`)
+
+        	expect(pw.abs.bind(null,'index')).to.throw(Error);
+
+        	fse.removeSync(_root_b_b_indexjs);
         })
 
         it(`Finds './c/c/index.js' from various search expressions`, function() {
+          
           fse.removeSync(_root_indexjs);
+          fse.removeSync(_root_c_c_cjs);
 
           _root_c_c_indexjs = path.join(_root_c_c, 'index.js');
           fse.writeFileSync(_root_c_c_indexjs, `${_root_c_c_indexjs}`)
 
-          // expect(pw.abs('index.js'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('index'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('/'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('./index'))
-          //   .to.eql(_root_indexjs);
-          // expect(pw.abs('./index.js'))
-          //   .to.eql(_root_indexjs);
+          pw = PathWizard(path.join(__dirname, 'test-folder'));
+
+	      expect(pw.abs('index.js')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('index')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('/')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('./index')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('./index.js')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('c/index.js')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('c/index')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('./c/index')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('./c/index.js')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('./c')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('./c/c')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('c/c')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('c/c/index')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('c/c/index.js')).to.eql(_root_c_c_indexjs);
+          expect(pw.abs('./c/c')).to.eql(_root_c_c_indexjs);
+          expect(pw.abs('./c/c/index')).to.eql(_root_c_c_indexjs);
+          expect(pw.abs('./c/c/index.js')).to.eql(_root_c_c_indexjs);
         })
 
       })
@@ -220,7 +235,6 @@ describe('PathWizard Testing', function() {
   })
 
   after('Deletes the test folder', function() {
-    const _root = path.join(__dirname, './test-folder');
     fse.removeSync(_root);
   })
 

@@ -37,12 +37,6 @@ PathWizard.prototype.abs = function (filePath) {
     _filePathWithIndex.push(_filePathWithIndex.pop().replace(/\.\w+/, ''), 'index.js');
   };
 
-  // console.log('\n');
-  // console.log('filePath', filePath);
-  // console.log('_filePath', _filePath);
-  // console.log('_filePathWithIndex', _filePathWithIndex);
-  // console.log('\n');
-
   matches = findMatchingDirectories.bind(this)(_filePath);
 
   if (!matches.length && _filePathWithIndex) matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
