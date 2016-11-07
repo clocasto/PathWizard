@@ -206,14 +206,24 @@ describe('PathWizard Testing', function() {
     describe('Folder matching', function() {
 
       it(`Finds './test-folder/a' from various search expressions`, function() {
-      	  // expect(pw.absDir('./a')).to.eql(_root_a);
+      	  expect(pw.absDir('./a')).to.eql(_root_a);
       	  expect(pw.absDir.bind(null,'a')).to.throw(Error);
           expect(pw.absDir('a/a')).to.eql(_root_a_a);
       })
 
-      it(`Finds 'test-folder/a/a', in the same directory, searching for 'index'`, function() {
+      it(`Finds './c/c/c.js' from various search expressions`, function() {
+    	  fse.writeFileSync(_root_c_c_cjs, `${_root_c_c_cjs}`)
 
-      })
+    	  pw = PathWizard(path.join(__dirname, 'test-folder'));
+
+	      expect(pw.absDir('c.js')).to.eql(_root_c_c_cjs);
+	      expect(pw.absDir('c/c.js')).to.eql(_root_c_c_cjs);
+	      expect(pw.absDir('./c/c')).to.eql(_root_c_c);
+	      expect(pw.absDir('c/c/c.js')).to.eql(_root_c_c_cjs);
+	      expect(pw.absDir('./c/c/c.js')).to.eql(_root_c_c_cjs);
+          expect(pw.absDir.bind(null,'c')).to.throw(Error);
+	      expect(pw.absDir.bind(null,'c/c')).to.throw(Error);
+        })
 
       it(`Finds 'test-folder/a', in the same directory, searching for '/'`, function() {
 

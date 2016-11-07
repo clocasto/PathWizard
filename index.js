@@ -20,7 +20,7 @@ PathWizard.prototype.abs = function(filePath) {
     if (_filePath[_filePath.length - 1] === '') _filePath.pop();
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
-
+  // console.log('_filePath', _filePath);
   if (this.cache && !this.nodes.length) {
     traverse.bind(this)();
     prependRoot.bind(this)();
@@ -38,11 +38,11 @@ PathWizard.prototype.abs = function(filePath) {
   };
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-
+  // console.log('this.nodes', this.nodes);
+  // console.log('matches', matches);
   if (!matches.length && _filePathWithIndex)
     matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
-  if (matches.length === 1) return path.join(this.root, ...matches.pop()
-    .slice(1));
+  if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
   else err.bind(this)(filePath, matches);
 }
 
@@ -83,7 +83,7 @@ PathWizard.prototype.absDir = function(filePath) {
     if (_filePath[_filePath.length - 1] === '') _filePath.pop();
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
-
+  // console.log('_filePath', _filePath);
   if (this.cache && !this.nodes.length) {
     traverse.bind(this)();
     prependRoot.bind(this)();
@@ -93,9 +93,9 @@ PathWizard.prototype.absDir = function(filePath) {
   }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-
-  if (matches.length === 1) return path.join(this.root, ...matches.pop()
-    .slice(1));
+  // console.log('this.nodes', this.nodes);
+  // console.log('matches', matches);
+  if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
   else err.bind(this)(filePath, matches);
 };
 
