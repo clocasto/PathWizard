@@ -1,26 +1,33 @@
 const fs = require('fs');
 const path = require('path');
 
-function PathWizard(rootPath = process.cwd()) {
+function PathWizard(rootPath = process.cwd(), options = { cache: true }) {
   this.root = rootPath;
   this.ignored = ['node_modules', 'bower_components'];
   this.nodes = [];
+  this.cache = !!options.cache
 }
 
 PathWizard.prototype.abs = function(filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
   if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
-  let _filePath, _filePathWithIndex, matches = [];
+  let _filePath, _filePathWithIndex, matches;
   if (filePath === '/') {
     _filePath = ['index.js'];
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
     if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath.shift();
+    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
 
-  if (!this.nodes.length) traverse.bind(this)();
+  if (this.cache && !this.nodes.length) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  } else if (!this.cache) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  }
 
   let target = _filePath[_filePath.length - 1];
   if (target.indexOf('.') < 0) {
@@ -34,7 +41,8 @@ PathWizard.prototype.abs = function(filePath) {
 
   if (!matches.length && _filePathWithIndex)
     matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
-  if (matches.length === 1) return path.join(this.root, ...matches.pop());
+  if (matches.length === 1) return path.join(this.root, ...matches.pop()
+    .slice(1));
   else err.bind(this)(filePath, matches);
 }
 
@@ -63,12 +71,45 @@ PathWizard.prototype.ignore = function(expressions) {
   return this;
 };
 
-PathWizard.prototype.absDir = function() {
+PathWizard.prototype.absDir = function(filePath) {
+  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
+  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
+  let _filePath, matches;
+  if (filePath === '/') {
+    return path.normalize(this.root);
+  } else {
+    _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
+    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
+    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+  }
+
+  if (this.cache && !this.nodes.length) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  } else if (!this.cache) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  }
+
+  matches = findMatchingDirectories.bind(this)(_filePath);
+
+  if (matches.length === 1) return path.join(this.root, ...matches.pop()
+    .slice(1));
+  else err.bind(this)(filePath, matches);
 };
 
-PathWizard.prototype.relDir = function() {
+PathWizard.prototype.relDir = function(filePath) {
+  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
+  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
+  const fileName = filePath.slice()
+    .split(path.sep)
+    .pop();
+  const to = path.normalize(this.absDir(filePath));
+  const rel = path.relative('', to);
+  if (rel === fileName) return '';
+  return /\.\./.test(rel) ? rel : `./${rel}`;
 };
 
 function traverse(directory = '') {
@@ -116,6 +157,13 @@ function ignorePath(pathSegment) {
     this.ignored.push(...pathSegment);
   }
   this.ignored.push(pathSegment);
+}
+
+function prependRoot() {
+  this.nodes = this.nodes.map((node) => {
+    node.unshift('~')
+    return node;
+  });
 }
 
 function err(filePath, matches) {

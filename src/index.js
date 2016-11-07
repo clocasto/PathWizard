@@ -7,10 +7,12 @@ var path = require('path');
 
 function PathWizard() {
   var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { cache: true };
 
   this.root = rootPath;
   this.ignored = ['node_modules', 'bower_components'];
   this.nodes = [];
+  this.cache = !!options.cache;
 }
 
 PathWizard.prototype.abs = function (filePath) {
@@ -19,16 +21,22 @@ PathWizard.prototype.abs = function (filePath) {
 
   var _filePath = void 0,
       _filePathWithIndex = void 0,
-      matches = [];
+      matches = void 0;
   if (filePath === '/') {
     _filePath = ['index.js'];
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
     if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath.shift();
+    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
-
-  if (!this.nodes.length) traverse.bind(this)();
+  // console.log('_filePath', _filePath);
+  if (this.cache && !this.nodes.length) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  } else if (!this.cache) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  }
 
   var target = _filePath[_filePath.length - 1];
   if (target.indexOf('.') < 0) {
@@ -38,9 +46,10 @@ PathWizard.prototype.abs = function (filePath) {
   };
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-
+  // console.log('this.nodes', this.nodes);
+  // console.log('matches', matches);
   if (!matches.length && _filePathWithIndex) matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
-  if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop())));else err.bind(this)(filePath, matches);
+  if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
 };
 
 PathWizard.prototype.rel = function (filePath) {
@@ -67,9 +76,44 @@ PathWizard.prototype.ignore = function (expressions) {
   return this;
 };
 
-PathWizard.prototype.absDir = function () {};
+PathWizard.prototype.absDir = function (filePath) {
+  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
+  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
 
-PathWizard.prototype.relDir = function () {};
+  var _filePath = void 0,
+      matches = void 0;
+  if (filePath === '/') {
+    return path.normalize(this.root);
+  } else {
+    _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
+    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
+    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+  }
+
+  if (this.cache && !this.nodes.length) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  } else if (!this.cache) {
+    traverse.bind(this)();
+    prependRoot.bind(this)();
+  }
+
+  matches = findMatchingDirectories.bind(this)(_filePath);
+
+  if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
+};
+
+PathWizard.prototype.relDir = function (filePath) {
+  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
+  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+
+  var fileName = filePath.slice().split(path.sep).pop();
+  var to = path.normalize(this.absDir(filePath));
+  var rel = path.relative('', to);
+  if (rel === fileName) return '';
+  return (/\.\./.test(rel) ? rel : './' + rel
+  );
+};
 
 function traverse() {
   var _this = this;
@@ -120,6 +164,13 @@ function ignorePath(pathSegment) {
     (_ignored = this.ignored).push.apply(_ignored, _toConsumableArray(pathSegment));
   }
   this.ignored.push(pathSegment);
+}
+
+function prependRoot() {
+  this.nodes = this.nodes.map(function (node) {
+    node.unshift('~');
+    return node;
+  });
 }
 
 function err(filePath, matches) {

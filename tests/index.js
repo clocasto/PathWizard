@@ -57,7 +57,7 @@ describe('PathWizard Testing', function() {
 
   describe('Module Methods and Functionality', function() {
 
-    it(`PathWizard should only have 'abs', 'absDir', 'rel', 'relDir', 'req', and 'ignore' methods`, function() {
+    it(`PathWizard should have 'abs', 'absDir', 'rel', 'relDir', 'req', and 'ignore' methods`, function() {
       const pw = PathWizard();
       expect(pw.abs)
         .to.be.an.instanceof(Function);
@@ -88,6 +88,10 @@ describe('PathWizard Testing', function() {
     it('When PathWizard is invoked with a non-string typed path, an Error is thrown', function() {
       expect(PathWizard.bind(null, ([__dirname, 'test-folder'])))
         .to.throw('PathWizard constructor only accepts undefined or a string-typed project directory.');
+    })
+
+    it('PathWizard caches the file structure by default, with an option to disable', function() {
+      
     })
 
   })
@@ -184,14 +188,9 @@ describe('PathWizard Testing', function() {
 	      expect(pw.abs('index.js')).to.eql(_root_c_c_indexjs);
 	      expect(pw.abs('index')).to.eql(_root_c_c_indexjs);
 	      expect(pw.abs('/')).to.eql(_root_c_c_indexjs);
-	      expect(pw.abs('./index')).to.eql(_root_c_c_indexjs);
-	      expect(pw.abs('./index.js')).to.eql(_root_c_c_indexjs);
-	      expect(pw.abs('c/index.js')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('index.js')).to.eql(_root_c_c_indexjs);
 	      expect(pw.abs('c/index')).to.eql(_root_c_c_indexjs);
-	      expect(pw.abs('./c/index')).to.eql(_root_c_c_indexjs);
-	      expect(pw.abs('./c/index.js')).to.eql(_root_c_c_indexjs);
-	      expect(pw.abs('./c')).to.eql(_root_c_c_indexjs);
-	      expect(pw.abs('./c/c')).to.eql(_root_c_c_indexjs);
+	      expect(pw.abs('c/index.js')).to.eql(_root_c_c_indexjs);
 	      expect(pw.abs('c/c')).to.eql(_root_c_c_indexjs);
 	      expect(pw.abs('c/c/index')).to.eql(_root_c_c_indexjs);
 	      expect(pw.abs('c/c/index.js')).to.eql(_root_c_c_indexjs);
@@ -206,8 +205,10 @@ describe('PathWizard Testing', function() {
 
     describe('Folder matching', function() {
 
-      it(`Finds 'test-folder/a', in the same directory, searching for 'index.js'`, function() {
-
+      it(`Finds './test-folder/a' from various search expressions`, function() {
+      	  // expect(pw.absDir('./a')).to.eql(_root_a);
+      	  expect(pw.absDir.bind(null,'a')).to.throw(Error);
+          expect(pw.absDir('a/a')).to.eql(_root_a_a);
       })
 
       it(`Finds 'test-folder/a/a', in the same directory, searching for 'index'`, function() {
