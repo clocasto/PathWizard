@@ -1,12 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-function PathWizard(rootPath = process.cwd(), options = { cache: true }) {
+function PathWizard(rootPath = process.cwd(), options = { cache: true, ignored: ['node_modules', 'bower_components'] }) {
   this.root = rootPath;
-  this.ignored = ['node_modules', 'bower_components'];
+  this.ignored = options.ignored;
   this.nodes = [];
   this.cache = !!options.cache;
-  // console.log(`PathWizard is ${this.cache ? 'caching!' : 'not caching!'}`);
 }
 
 PathWizard.prototype.abs = function (filePath) {
@@ -40,8 +39,8 @@ PathWizard.prototype.abs = function (filePath) {
   }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-  console.log('this.nodes', this.nodes);
-  console.log('matches', matches);
+  // console.log('this.nodes', this.nodes);
+  // console.log('matches', matches);
   if (!matches.length && _filePathWithIndex)
     matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
   if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
@@ -52,20 +51,14 @@ PathWizard.prototype.rel = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
   if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
-  const fileName = filePath.slice()
-    .split(path.sep)
-    .pop();
-
-  // console.log('root', this.root);
-
   const _to = path.normalize(this.abs(filePath));
-  console.log('PW (to)', _to);
+  // console.log('PW (to)', _to);
 
   const _from = module.parent.filename;
-  console.log('PW (from)', _from);
+  // console.log('PW (from)', _from);
 
   const rel = path.relative(_from, _to).slice(3);
-  console.log('PW (rel)', rel, '\n');
+  // console.log('PW (rel)', rel, '\n');
 
   return /\.\./.test(rel) ? rel : `./${rel}`;
 }
@@ -115,14 +108,16 @@ PathWizard.prototype.relDir = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
   if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
-  const fileName = filePath.slice()
-    .split(path.sep)
-    .pop();
   const to = path.normalize(this.absDir(filePath));
   const rel = path.relative('', to);
-  if (rel === fileName) return '';
+
   return /\.\./.test(rel) ? rel : `./${rel}`;
 };
+
+PathWizard.prototype.flush = function () {
+  this.nodes = [];
+  return this;
+}
 
 function traverse(directory = '') {
   const nodes = fs.readdirSync(path.join(this.root, directory))

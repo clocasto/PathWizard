@@ -5,12 +5,6 @@ const path = require('path');
 const PathWizard = require('../src');
 const expect = chai.expect;
 
-// describe('IDK', function() {
-//   it('does something', function() {
-//     expect(require('./test-folder/c/c/d')).to.eql('./c.js');
-//   })
-// })
-
 chai.use(spies);
 
 let _root,
@@ -76,9 +70,9 @@ describe('PathWizard Testing', function () {
   })
 
   describe('Module Methods and Functionality', function () {
+    const pw = PathWizard(undefined, { cache: false });
 
     it(`PathWizard should have 'abs', 'absDir', 'rel', 'relDir', 'req', and 'ignore' methods`, function () {
-      const pw = PathWizard();
       expect(pw.abs).to.be.an.instanceof(Function);
       expect(pw.absDir).to.be.an.instanceof(Function);
       expect(pw.rel).to.be.an.instanceof(Function);
@@ -88,14 +82,13 @@ describe('PathWizard Testing', function () {
     })
 
     it(`When PathWizard is invoked with no argument, the current root is the process' CWD`, function () {
-      const pw = PathWizard();
       expect(path.normalize(pw.root))
         .to.eql(path.normalize(path.join(__dirname, '..')))
     })
 
     it('When PathWizard is invoked with a string-typed path, the current root is adjusted', function () {
-      const pw = PathWizard(_root_c_c);
-      expect(path.normalize(pw.root))
+      const pw2 = PathWizard(_root_c_c);
+      expect(path.normalize(pw2.root))
         .to.eql(path.normalize(_root_c_c));
     })
 
@@ -105,7 +98,8 @@ describe('PathWizard Testing', function () {
     })
 
     it('PathWizard caches the file structure by default, with an option to disable', function () {
-
+      const pw3 = PathWizard();
+      expect(pw3.cache).to.be(true);
     })
 
   })
@@ -196,8 +190,6 @@ describe('PathWizard Testing', function () {
 
           _root_c_c_indexjs = path.join(_root_c_c, 'index.js');
           fse.writeFileSync(_root_c_c_indexjs, `${_root_c_c_indexjs}`)
-
-          // const pw = PathWizard(path.join(__dirname, 'test-folder'));
 
           expect(pw.abs('index.js')).to.eql(_root_c_c_indexjs);
           expect(pw.abs('index')).to.eql(_root_c_c_indexjs);

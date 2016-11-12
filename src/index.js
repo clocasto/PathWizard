@@ -7,13 +7,12 @@ var path = require('path');
 
 function PathWizard() {
   var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { cache: true };
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { cache: true, ignored: ['node_modules', 'bower_components'] };
 
   this.root = rootPath;
-  this.ignored = ['node_modules', 'bower_components'];
+  this.ignored = options.ignored;
   this.nodes = [];
   this.cache = !!options.cache;
-  // console.log(`PathWizard is ${this.cache ? 'caching!' : 'not caching!'}`);
 }
 
 PathWizard.prototype.abs = function (filePath) {
@@ -48,8 +47,8 @@ PathWizard.prototype.abs = function (filePath) {
   }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-  console.log('this.nodes', this.nodes);
-  console.log('matches', matches);
+  // console.log('this.nodes', this.nodes);
+  // console.log('matches', matches);
   if (!matches.length && _filePathWithIndex) matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
   if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
 };
@@ -58,18 +57,14 @@ PathWizard.prototype.rel = function (filePath) {
   if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
   if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
 
-  var fileName = filePath.slice().split(path.sep).pop();
-
-  // console.log('root', this.root);
-
   var _to = path.normalize(this.abs(filePath));
-  console.log('PW (to)', _to);
+  // console.log('PW (to)', _to);
 
   var _from = module.parent.filename;
-  console.log('PW (from)', _from);
+  // console.log('PW (from)', _from);
 
   var rel = path.relative(_from, _to).slice(3);
-  console.log('PW (rel)', rel, '\n');
+  // console.log('PW (rel)', rel, '\n');
 
   return (/\.\./.test(rel) ? rel : './' + rel
   );
@@ -120,12 +115,16 @@ PathWizard.prototype.relDir = function (filePath) {
   if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
   if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
 
-  var fileName = filePath.slice().split(path.sep).pop();
   var to = path.normalize(this.absDir(filePath));
   var rel = path.relative('', to);
-  if (rel === fileName) return '';
+
   return (/\.\./.test(rel) ? rel : './' + rel
   );
+};
+
+PathWizard.prototype.flush = function () {
+  this.nodes = [];
+  return this;
 };
 
 function traverse() {
