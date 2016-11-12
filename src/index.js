@@ -13,6 +13,7 @@ function PathWizard() {
   this.ignored = ['node_modules', 'bower_components'];
   this.nodes = [];
   this.cache = !!options.cache;
+  // console.log(`PathWizard is ${this.cache ? 'caching!' : 'not caching!'}`);
 }
 
 PathWizard.prototype.abs = function (filePath) {
@@ -29,11 +30,12 @@ PathWizard.prototype.abs = function (filePath) {
     if (_filePath[_filePath.length - 1] === '') _filePath.pop();
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
-  // console.log('_filePath', _filePath);
+
   if (this.cache && !this.nodes.length) {
     traverse.bind(this)();
     prependRoot.bind(this)();
   } else if (!this.cache) {
+    this.nodes = [];
     traverse.bind(this)();
     prependRoot.bind(this)();
   }
@@ -43,11 +45,11 @@ PathWizard.prototype.abs = function (filePath) {
     _filePath.push(_filePath.pop() + '.js');
     _filePathWithIndex = _filePath.slice();
     _filePathWithIndex.push(_filePathWithIndex.pop().replace(/\.\w+/, ''), 'index.js');
-  };
+  }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-  // console.log('this.nodes', this.nodes);
-  // console.log('matches', matches);
+  console.log('this.nodes', this.nodes);
+  console.log('matches', matches);
   if (!matches.length && _filePathWithIndex) matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
   if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
 };
@@ -57,9 +59,18 @@ PathWizard.prototype.rel = function (filePath) {
   if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
 
   var fileName = filePath.slice().split(path.sep).pop();
-  var to = path.normalize(this.abs(filePath));
-  var rel = path.relative('', to);
-  if (rel === fileName) return '';
+
+  // console.log('root', this.root);
+
+  var _to = path.normalize(this.abs(filePath));
+  console.log('PW (to)', _to);
+
+  var _from = module.parent.filename;
+  console.log('PW (from)', _from);
+
+  var rel = path.relative(_from, _to).slice(3);
+  console.log('PW (rel)', rel, '\n');
+
   return (/\.\./.test(rel) ? rel : './' + rel
   );
 };
@@ -94,6 +105,7 @@ PathWizard.prototype.absDir = function (filePath) {
     traverse.bind(this)();
     prependRoot.bind(this)();
   } else if (!this.cache) {
+    this.nodes = [];
     traverse.bind(this)();
     prependRoot.bind(this)();
   }
@@ -181,8 +193,14 @@ function err(filePath, matches) {
 }
 
 function PathWizardModule(rootPath) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { cache: true };
+
   if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  return new PathWizard(rootPath);
+  return new PathWizard(rootPath, options);
 }
 
 module.exports = PathWizardModule;
+
+// console.log('module.cache', require.cache[__filename].parent);
+
+delete require.cache[__filename];

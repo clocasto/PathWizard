@@ -5,10 +5,11 @@ function PathWizard(rootPath = process.cwd(), options = { cache: true }) {
   this.root = rootPath;
   this.ignored = ['node_modules', 'bower_components'];
   this.nodes = [];
-  this.cache = !!options.cache
+  this.cache = !!options.cache;
+  // console.log(`PathWizard is ${this.cache ? 'caching!' : 'not caching!'}`);
 }
 
-PathWizard.prototype.abs = function(filePath) {
+PathWizard.prototype.abs = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
   if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
@@ -20,11 +21,12 @@ PathWizard.prototype.abs = function(filePath) {
     if (_filePath[_filePath.length - 1] === '') _filePath.pop();
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
-  // console.log('_filePath', _filePath);
+
   if (this.cache && !this.nodes.length) {
     traverse.bind(this)();
     prependRoot.bind(this)();
   } else if (!this.cache) {
+    this.nodes = [];
     traverse.bind(this)();
     prependRoot.bind(this)();
   }
@@ -35,43 +37,52 @@ PathWizard.prototype.abs = function(filePath) {
     _filePathWithIndex = _filePath.slice();
     _filePathWithIndex.push(_filePathWithIndex.pop()
       .replace(/\.\w+/, ''), 'index.js');
-  };
+  }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-  // console.log('this.nodes', this.nodes);
-  // console.log('matches', matches);
+  console.log('this.nodes', this.nodes);
+  console.log('matches', matches);
   if (!matches.length && _filePathWithIndex)
     matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
   if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
   else err.bind(this)(filePath, matches);
 }
 
-PathWizard.prototype.rel = function(filePath) {
+PathWizard.prototype.rel = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
   if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
   const fileName = filePath.slice()
     .split(path.sep)
     .pop();
-  const to = path.normalize(this.abs(filePath));
-  const rel = path.relative('', to);
-  if (rel === fileName) return '';
+
+  // console.log('root', this.root);
+
+  const _to = path.normalize(this.abs(filePath));
+  console.log('PW (to)', _to);
+
+  const _from = module.parent.filename;
+  console.log('PW (from)', _from);
+
+  const rel = path.relative(_from, _to).slice(3);
+  console.log('PW (rel)', rel, '\n');
+
   return /\.\./.test(rel) ? rel : `./${rel}`;
 }
 
-PathWizard.prototype.req = function(filePath) {
+PathWizard.prototype.req = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'req' method.`);
   if (!filePath.length) throw new Error(`The 'req' method requires a non-empty string or array search expression.`);
 
   return require(this.abs(filePath));
 };
 
-PathWizard.prototype.ignore = function(expressions) {
+PathWizard.prototype.ignore = function (expressions) {
   ignorePath.bind(this)(expressions);
   return this;
 };
 
-PathWizard.prototype.absDir = function(filePath) {
+PathWizard.prototype.absDir = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
   if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
@@ -88,6 +99,7 @@ PathWizard.prototype.absDir = function(filePath) {
     traverse.bind(this)();
     prependRoot.bind(this)();
   } else if (!this.cache) {
+    this.nodes = [];
     traverse.bind(this)();
     prependRoot.bind(this)();
   }
@@ -99,7 +111,7 @@ PathWizard.prototype.absDir = function(filePath) {
   else err.bind(this)(filePath, matches);
 };
 
-PathWizard.prototype.relDir = function(filePath) {
+PathWizard.prototype.relDir = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
   if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
@@ -173,10 +185,14 @@ function err(filePath, matches) {
     throw `The path did not uniquely resolve! ${'\n\n'}${matches.map (match => path.join(...match)).join('\n')}${'\n'}`;
 }
 
-function PathWizardModule(rootPath) {
+function PathWizardModule(rootPath, options = { cache: true }) {
   if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  return new PathWizard(rootPath);
+  return new PathWizard(rootPath, options);
 }
 
 module.exports = PathWizardModule;
+
+// console.log('module.cache', require.cache[__filename].parent);
+
+delete require.cache[__filename];
 
