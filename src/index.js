@@ -7,12 +7,17 @@ var path = require('path');
 
 function PathWizard() {
   var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { cache: true, ignored: ['node_modules', 'bower_components'] };
+
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$cache = _ref.cache,
+      cache = _ref$cache === undefined ? true : _ref$cache,
+      _ref$ignored = _ref.ignored,
+      ignored = _ref$ignored === undefined ? ['node_modules', 'bower_components'] : _ref$ignored;
 
   this.root = rootPath;
-  this.ignored = options.ignored;
+  this.ignored = ignored;
   this.nodes = [];
-  this.cache = !!options.cache;
+  this.cache = !!cache;
 }
 
 PathWizard.prototype.abs = function (filePath) {
@@ -31,11 +36,11 @@ PathWizard.prototype.abs = function (filePath) {
   }
 
   if (this.cache && !this.nodes.length) {
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   } else if (!this.cache) {
     this.nodes = [];
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   }
 
@@ -97,11 +102,11 @@ PathWizard.prototype.absDir = function (filePath) {
   }
   // console.log('_filePath', _filePath);
   if (this.cache && !this.nodes.length) {
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   } else if (!this.cache) {
     this.nodes = [];
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   }
 
@@ -127,7 +132,7 @@ PathWizard.prototype.flush = function () {
   return this;
 };
 
-function traverse() {
+PathWizard.prototype.traverse = function () {
   var _this = this;
 
   var directory = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -139,12 +144,12 @@ function traverse() {
 
   nodes.forEach(function (node) {
     if (fs.statSync(path.join(_this.root, directory, node)).isDirectory()) {
-      traverse.bind(_this)(path.join(directory, node));
+      _this.traverse.bind(_this)(path.join(directory, node));
     }
     _this.nodes.push(path.join(directory, node).split(path.sep));
   });
   return this.nodes;
-}
+};
 
 function findMatchingDirectories(_filePath) {
   var matches = [];
@@ -191,15 +196,11 @@ function err(filePath, matches) {
   }).join('\n') + '\n';
 }
 
-function PathWizardModule(rootPath) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { cache: true };
-
+function PathWizardModule(rootPath, options) {
   if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
   return new PathWizard(rootPath, options);
 }
 
 module.exports = PathWizardModule;
-
-// console.log('module.cache', require.cache[__filename].parent);
 
 delete require.cache[__filename];

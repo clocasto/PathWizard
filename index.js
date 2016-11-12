@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-function PathWizard(rootPath = process.cwd(), options = { cache: true, ignored: ['node_modules', 'bower_components'] }) {
+function PathWizard(rootPath = process.cwd(), { cache = true, ignored = ['node_modules', 'bower_components'] } = {}) {
   this.root = rootPath;
-  this.ignored = options.ignored;
+  this.ignored = ignored;
   this.nodes = [];
-  this.cache = !!options.cache;
+  this.cache = !!cache;
 }
 
 PathWizard.prototype.abs = function (filePath) {
@@ -22,11 +22,11 @@ PathWizard.prototype.abs = function (filePath) {
   }
 
   if (this.cache && !this.nodes.length) {
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   } else if (!this.cache) {
     this.nodes = [];
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   }
 
@@ -89,11 +89,11 @@ PathWizard.prototype.absDir = function (filePath) {
   }
   // console.log('_filePath', _filePath);
   if (this.cache && !this.nodes.length) {
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   } else if (!this.cache) {
     this.nodes = [];
-    traverse.bind(this)();
+    this.traverse();
     prependRoot.bind(this)();
   }
 
@@ -119,7 +119,7 @@ PathWizard.prototype.flush = function () {
   return this;
 }
 
-function traverse(directory = '') {
+PathWizard.prototype.traverse = function (directory = '') {
   const nodes = fs.readdirSync(path.join(this.root, directory))
     .filter(n => {
       const name = n.split(path.sep)
@@ -130,7 +130,7 @@ function traverse(directory = '') {
   nodes.forEach(node => {
     if (fs.statSync(path.join(this.root, directory, node))
       .isDirectory()) {
-      traverse.bind(this)(path.join(directory, node));
+      this.traverse.bind(this)(path.join(directory, node));
     }
     this.nodes.push(path.join(directory, node)
       .split(path.sep));
@@ -180,14 +180,12 @@ function err(filePath, matches) {
     throw `The path did not uniquely resolve! ${'\n\n'}${matches.map (match => path.join(...match)).join('\n')}${'\n'}`;
 }
 
-function PathWizardModule(rootPath, options = { cache: true }) {
+function PathWizardModule(rootPath, options) {
   if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
   return new PathWizard(rootPath, options);
 }
 
 module.exports = PathWizardModule;
-
-// console.log('module.cache', require.cache[__filename].parent);
 
 delete require.cache[__filename];
 

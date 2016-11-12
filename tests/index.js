@@ -21,7 +21,7 @@ let _root,
   _root_c_c_cjs,
   _root_c_c_indexjs;
 
-describe('PathWizard Testing', function () {
+describe('PathWizard', function () {
 
   before('Assemble a test file tree', function () {
     _root = path.join(__dirname, './test-folder');
@@ -62,14 +62,13 @@ describe('PathWizard Testing', function () {
       const path = require('path');
       const pw = require('../../../../src/index.js')(path.join(__dirname, '../../'));
       const answer = pw.rel('c.js');
-      console.log('d.js -> answer', answer);
       module.exports = answer;
       `
     )
 
   })
 
-  describe('Module Methods and Functionality', function () {
+  describe('Has Certain Module Methods and Functionality', function () {
     const pw = PathWizard(undefined, { cache: false });
 
     it(`PathWizard should have 'abs', 'absDir', 'rel', 'relDir', 'req', and 'ignore' methods`, function () {
@@ -98,29 +97,51 @@ describe('PathWizard Testing', function () {
     })
 
     it('PathWizard caches the file structure by default, with an option to disable', function () {
-      const pw3 = PathWizard();
-      expect(pw3.cache).to.be(true);
+      const pwCache = PathWizard();
+      expect(pwCache.cache).to.eql(true);
+
+      const pwNoCache = PathWizard(undefined, { cache: false });
+      expect(pwNoCache.cache).to.eql(false);
+
+      const cacheSpy = chai.spy.on(pwCache, 'traverse');
+      const noCacheSpy = chai.spy.on(pwNoCache, 'traverse');
+
+      expect(cacheSpy).to.be.spy;
+      expect(noCacheSpy).to.be.spy;
+
+      pwCache.abs('b');
+      pwCache.abs('b');
+      pwCache.abs('b');
+      pwCache.abs('b');
+
+      pwNoCache.abs('b');
+      pwNoCache.abs('b');
+      pwNoCache.abs('b');
+      pwNoCache.abs('b');
+
+      expect(cacheSpy).to.have.been.called.exactly(10);
+      expect(noCacheSpy).to.have.been.called.exactly(40);
     })
 
   })
 
-  describe('Absolute Path', function () {
+  describe('Can, For Absolute Paths,', function () {
 
     const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
 
-    describe('File matching', function () {
+    describe('Handle Invalid Arguments', function () {
 
-      describe('Invalid Arguments', function () {
-
-        it('Throws an error when an invalid argument is provided', function () {
-          expect(pw.abs.bind(null, '')).to.throw(Error);
-          expect(pw.abs.bind(null)).to.throw(Error);
-          expect(pw.abs.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
-        })
-
+      it('Throws an error when an invalid argument is provided', function () {
+        expect(pw.abs.bind(null, '')).to.throw(Error);
+        expect(pw.abs.bind(null)).to.throw(Error);
+        expect(pw.abs.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
       })
 
-      describe('Root directory', function () {
+    })
+
+    describe('Find and Match Files', function () {
+
+      describe('From A Root Directory', function () {
 
         it(`Finds './index.js' from various search expressions`, function () {
           expect(pw.abs('index.js')).to.eql(_root_indexjs);
@@ -139,7 +160,7 @@ describe('PathWizard Testing', function () {
 
       })
 
-      describe('Nested directories', function () {
+      describe('In And From Nested directories', function () {
 
         it(`Finds './a/test.js' from various search expressions`, function () {
           expect(pw.abs('a/test.js')).to.eql(_root_a_testjs);
@@ -203,7 +224,6 @@ describe('PathWizard Testing', function () {
           expect(pw.abs('./c/c')).to.eql(_root_c_c_indexjs);
           expect(pw.abs('./c/c/index')).to.eql(_root_c_c_indexjs);
           expect(pw.abs('./c/c/index.js')).to.eql(_root_c_c_indexjs);
-
         })
 
       })
@@ -228,7 +248,6 @@ describe('PathWizard Testing', function () {
         expect(pw.absDir('./c/c/c.js')).to.eql(_root_c_c_cjs);
         expect(pw.absDir.bind(null, 'c')).to.throw(Error);
         expect(pw.absDir.bind(null, 'c/c')).to.throw(Error);
-
       })
 
     })
@@ -238,19 +257,19 @@ describe('PathWizard Testing', function () {
   describe('Relative Path', function () {
     const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
 
-    const format = pathStr => `./${path.relative(__dirname, pathStr)}`
+    const format = pathStr => `./${path.relative(__dirname, pathStr)}`;
+
+    describe('Invalid Arguments', function () {
+
+      it('Throws an error when an invalid argument is provided', function () {
+        expect(pw.rel.bind(null, '')).to.throw(Error);
+        expect(pw.rel.bind(null)).to.throw(Error);
+        expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
+      })
+
+    })
 
     describe('File matching', function () {
-
-      describe('Invalid Arguments', function () {
-
-        it('Throws an error when an invalid argument is provided', function () {
-          expect(pw.rel.bind(null, '')).to.throw(Error);
-          expect(pw.rel.bind(null)).to.throw(Error);
-          expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
-        })
-
-      })
 
       it('Relies on PathWizard.abs to find absolute paths', function () {
         const absSpy = chai.spy.on(pw, 'abs');
@@ -278,7 +297,7 @@ describe('PathWizard Testing', function () {
       it(`Finds './test-folder/a' from various search expressions`, function () {
         expect(pw.absDir('./a')).to.eql(_root_a);
         expect(pw.absDir('a/a')).to.eql(_root_a_a);
-        expect(pw.absDir.bind(null, 'a')).to.throw(Error);
+        expect(pw.absDir.bind(this, 'a')).to.throw(Error);
       })
 
       it(`Finds './c/c/c.js' from various search expressions`, function () {
@@ -289,9 +308,8 @@ describe('PathWizard Testing', function () {
         expect(pw.absDir('./c/c')).to.eql(_root_c_c);
         expect(pw.absDir('c/c/c.js')).to.eql(_root_c_c_cjs);
         expect(pw.absDir('./c/c/c.js')).to.eql(_root_c_c_cjs);
-        expect(pw.absDir.bind(null, 'c')).to.throw(Error);
-        expect(pw.absDir.bind(null, 'c/c')).to.throw(Error);
-
+        expect(pw.absDir.bind(this, 'c')).to.throw(Error);
+        expect(pw.absDir.bind(this, 'c/c')).to.throw(Error);
       })
 
     })
