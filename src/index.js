@@ -52,8 +52,6 @@ PathWizard.prototype.abs = function (filePath) {
   }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-  // console.log('this.nodes', this.nodes);
-  // console.log('matches', matches);
   if (!matches.length && _filePathWithIndex) matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
   if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
 };
@@ -63,13 +61,8 @@ PathWizard.prototype.rel = function (filePath) {
   if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
 
   var _to = path.normalize(this.abs(filePath));
-  // console.log('PW (to)', _to);
-
   var _from = module.parent.filename;
-  // console.log('PW (from)', _from);
-
   var rel = path.relative(_from, _to).slice(3);
-  // console.log('PW (rel)', rel, '\n');
 
   return (/\.\./.test(rel) ? rel : './' + rel
   );
@@ -82,12 +75,9 @@ PathWizard.prototype.req = function (filePath) {
   var mod = void 0;
   try {
     mod = require(filePath);
-    // console.log('mod', mod);
   } catch (e) {
-    mod = require(this.abs(filePath));
-    // console.log('_mod', mod);
+    mod = require(pw.abs(filePath));
   } finally {
-    // console.log('mod', mod);
     return mod;
   }
 };
@@ -110,7 +100,6 @@ PathWizard.prototype.absDir = function (filePath) {
     if (_filePath[_filePath.length - 1] === '') _filePath.pop();
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
-  // console.log('_filePath', _filePath);
   if (this.cache && !this.nodes.length) {
     this.traverse();
     prependRoot.bind(this)();
@@ -121,8 +110,6 @@ PathWizard.prototype.absDir = function (filePath) {
   }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
-  // console.log('this.nodes', this.nodes);
-  // console.log('matches', matches);
   if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
 };
 

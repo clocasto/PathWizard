@@ -18,6 +18,7 @@ let _root,
   _root_appjs,
   _root_a_testjs,
   _root_b_bjs,
+  _root_b_indexjs,
   _root_c_c_cjs,
   _root_c_c_indexjs;
 
@@ -50,6 +51,7 @@ describe('PathWizard', function () {
     _root_a_testjs = path.join(_root_a, 'test.js');
     fse.writeFileSync(_root_a_testjs, `${_root_a_testjs}`)
 
+    _root_b_indexjs = path.join(_root_b, 'index.js');
     _root_b_bjs = path.join(_root_b, 'b.js');
     fse.writeFileSync(_root_b_bjs, `${_root_b_bjs}`)
 
@@ -141,6 +143,18 @@ describe('PathWizard', function () {
 
       expect(cacheSpy).to.have.been.called.exactly(10);
       expect(noCacheSpy).to.have.been.called.exactly(40);
+    })
+
+    describe(`PathWizard Will Ignore Certain Directories`, function () {
+
+      it(`Using the 'ignore' method`, function() {
+
+      })
+
+      it(`Using the 'ignore' option in the PathWizard constructor`, function() {
+        
+      })
+
     })
 
   })
@@ -341,9 +355,10 @@ describe('PathWizard', function () {
   })
 
   describe('Require Functionality', function () {
-    const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
 
     it('Throws an error when an invalid argument is provided', function () {
+      const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
+
       expect(pw.rel.bind(null, '')).to.throw(Error);
       expect(pw.rel.bind(null)).to.throw(Error);
       expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
@@ -351,20 +366,24 @@ describe('PathWizard', function () {
     })
 
     it(`Will require an installed module, prior to looking in its cache`, function () {
-      const pw2 = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
+      const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
 
-      const absSpy = chai.spy.on(pw2, 'abs');
+      const absSpy = chai.spy.on(pw, 'abs');
 
       expect(absSpy).to.be.spy;
 
-      const result = pw2.req('chai');
+      const result = pw.req('chai');
 
       expect(absSpy).to.not.have.been.called();
       expect(result).to.eql(require('chai'));
-
     })
 
     it('Relies on PathWizard.abs to find absolute paths', function () {
+      const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
+
+      fse.writeFileSync(_root_indexjs, `${_root_indexjs}`);
+      fse.writeFileSync(_root_b_indexjs, `${_root_b_indexjs}`);
+
       const absSpy = chai.spy.on(pw, 'abs');
       const absDirSpy = chai.spy.on(pw, 'absDir');
       const relSpy = chai.spy.on(pw, 'rel');
@@ -380,10 +399,6 @@ describe('PathWizard', function () {
       expect(relDirSpy).to.not.have.been.called();
       expect(result).to.eql(_root_c_c_cjs);
     })
-
-  })
-
-  describe('Ignoring Directories', function () {
 
   })
 
