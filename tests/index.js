@@ -66,6 +66,26 @@ describe('PathWizard', function () {
       `
     )
 
+    _root_c_c_fjs = path.join(_root_c_c, 'f.js');
+    fse.writeFileSync(_root_c_c_fjs,
+      `
+      const path = require('path');
+      const pw = require('../../../../src/index.js')(path.join(__dirname, '../../'));
+      const answer = pw.rel('b.js');
+      module.exports = answer;
+      `
+    )
+
+    _root_c_c_gjs = path.join(_root_c_c, 'g.js');
+    fse.writeFileSync(_root_c_c_gjs,
+      `
+      const path = require('path');
+      const pw = require('../../../../src/index.js')(path.join(__dirname, '../../'));
+      const answer = pw.rel('b.js');
+      module.exports = answer;
+      `
+    )
+
   })
 
   describe('Has Certain Module Methods and Functionality', function () {
@@ -135,6 +155,7 @@ describe('PathWizard', function () {
         expect(pw.abs.bind(null, '')).to.throw(Error);
         expect(pw.abs.bind(null)).to.throw(Error);
         expect(pw.abs.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
+        expect(pw.abs.bind(null, '[`${_root_indexjs}`]')).to.throw(Error);
       })
 
     })
@@ -265,6 +286,7 @@ describe('PathWizard', function () {
         expect(pw.rel.bind(null, '')).to.throw(Error);
         expect(pw.rel.bind(null)).to.throw(Error);
         expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
+        expect(pw.rel.bind(null, '[`${_root_indexjs}`]')).to.throw(Error);
       })
 
     })
@@ -288,6 +310,8 @@ describe('PathWizard', function () {
         fse.writeFileSync(_root_c_c_cjs, `${_root_c_c_cjs}`);
 
         expect(require('./test-folder/c/c/d.js')).to.eql('./c.js');
+        expect(require('./test-folder/c/c/f.js')).to.eql('../../b/b.js');
+        expect(require('./test-folder/c/c/f.js')).to.eql('../../b/b.js');
       })
 
     })
@@ -301,13 +325,13 @@ describe('PathWizard', function () {
       })
 
       it(`Finds './c/c/c.js' from various search expressions`, function () {
-        fse.writeFileSync(_root_c_c_cjs, `${_root_c_c_cjs}`)
+        fse.writeFileSync(_root_c_c_cjs, `module.exports = '${_root_c_c_cjs}'`)
 
-        expect(pw.absDir('c.js')).to.eql(_root_c_c_cjs);
-        expect(pw.absDir('c/c.js')).to.eql(_root_c_c_cjs);
+        expect(pw.absDir('c.js')).to.eql(require(_root_c_c_cjs));
+        expect(pw.absDir('c/c.js')).to.eql(require(_root_c_c_cjs));
         expect(pw.absDir('./c/c')).to.eql(_root_c_c);
-        expect(pw.absDir('c/c/c.js')).to.eql(_root_c_c_cjs);
-        expect(pw.absDir('./c/c/c.js')).to.eql(_root_c_c_cjs);
+        expect(pw.absDir('c/c/c.js')).to.eql(require(_root_c_c_cjs));
+        expect(pw.absDir('./c/c/c.js')).to.eql(require(_root_c_c_cjs));
         expect(pw.absDir.bind(this, 'c')).to.throw(Error);
         expect(pw.absDir.bind(this, 'c/c')).to.throw(Error);
       })
@@ -317,6 +341,45 @@ describe('PathWizard', function () {
   })
 
   describe('Require Functionality', function () {
+    const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
+
+    it('Throws an error when an invalid argument is provided', function () {
+      expect(pw.rel.bind(null, '')).to.throw(Error);
+      expect(pw.rel.bind(null)).to.throw(Error);
+      expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to.throw(Error);
+      expect(pw.rel.bind(null, '[`${_root_indexjs}`]')).to.throw(Error);
+    })
+
+    it(`Will require an installed module, prior to looking in its cache`, function () {
+      const pw2 = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
+
+      const absSpy = chai.spy.on(pw2, 'abs');
+
+      expect(absSpy).to.be.spy;
+
+      const result = pw2.req('chai');
+
+      expect(absSpy).to.not.have.been.called();
+      expect(result).to.eql(require('chai'));
+
+    })
+
+    it('Relies on PathWizard.abs to find absolute paths', function () {
+      const absSpy = chai.spy.on(pw, 'abs');
+      const absDirSpy = chai.spy.on(pw, 'absDir');
+      const relSpy = chai.spy.on(pw, 'rel');
+      const relDirSpy = chai.spy.on(pw, 'relDir');
+
+      expect(absSpy).to.be.spy;
+
+      const result = pw.req('c');
+
+      expect(absSpy).to.have.been.called();
+      expect(absDirSpy).to.not.have.been.called();
+      expect(relSpy).to.not.have.been.called();
+      expect(relDirSpy).to.not.have.been.called();
+      expect(result).to.eql(_root_c_c_cjs);
+    })
 
   })
 

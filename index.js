@@ -67,7 +67,18 @@ PathWizard.prototype.req = function (filePath) {
   if (!filePath) throw new Error(`A search expression must be provided to the 'req' method.`);
   if (!filePath.length) throw new Error(`The 'req' method requires a non-empty string or array search expression.`);
 
-  return require(this.abs(filePath));
+  let mod;
+  try {
+    mod = require(filePath);
+    // console.log('mod', mod);
+  } catch (e) {
+    mod = require(this.abs(filePath));
+    // console.log('_mod', mod);
+  } finally {
+    // console.log('mod', mod);
+    return mod;
+  }
+
 };
 
 PathWizard.prototype.ignore = function (expressions) {
