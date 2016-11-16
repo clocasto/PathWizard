@@ -50,10 +50,12 @@ Given the following project folder structure:
 
 Shortest Unique Filepath Results (based on the `abs` method):
 
-`'g' or 'g.js'`: `'/test-folder/c/c/g.js'`
-`'c/c' or 'c/c/c' or 'c'`: `'/test-folder/c/c/c.js'`
-`'index' or 'index.js'`: `throw new Error()`. Index is not a unique path.
-`'b'`: `'test-folder/b/b.js'`. Like `require`, `b.js` would take precedence over `b/index.js`.
+Search String | Result | Reason
+---------------------|-------------|------------
+`'g'` or `'g.js'`          | `'/test-folder/c/c/g.js'`  | Success!
+`'c/c'`, `'c/c/c'` or `'c'`| `'/test-folder/c/c/c.js'`  | Success!
+`'index'` or `'index.js'`  | `throw new Error()`. | Index is not a unique path.  
+`'b'`                    | `'test-folder/b/b.js'`. | Like `require`, `b.js` is prioritized over `b/index.js`.  
 
 ## API (Methods)
 
