@@ -1,11 +1,11 @@
 {
   "name": "PathWizard",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "A lightweight wrapper around `require` which finds modules and files based on the shortest unique path.",
   "main": "src/index.js",
   "keywords": [],
   "author": "@clocasto",
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {
     "test": "mocha tests/index.js",
     "transpile": "babel index.js --out-file src/index.js --presets=es2015"

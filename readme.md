@@ -85,4 +85,4 @@ Please use the AirBNB style guide for consistency. Add unit tests for any new or
 
 ## Release History
 
-* 0.1.0 Initial release
+* 0.0.1 Development
