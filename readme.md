@@ -29,7 +29,7 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
 
 Given the following project folder structure:
 
-```/test-folder
+``/test-folder
 ├── a
 │   ├── a.js
 │   └── test.js
@@ -44,7 +44,7 @@ Given the following project folder structure:
 │       ├── f.js
 │       ├── g.js
 │       └── index.js
-└── index.js```
+└── index.js``
 
 Shortest Unique Filepath Results (based on the `abs` method):
 
