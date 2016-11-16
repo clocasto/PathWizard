@@ -76,6 +76,9 @@ This method returns the absolute path of a matching *folder*. This method does *
 **relDir**  
 This method returns the relative path of a matching *folder*. This method does *not* match **files**.
 
+**traverse**  
+This method returns an array of all directory paths (files *and* folders) in the root directory.  
+
 **ignore**  
 This method adds the given directory name (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
 
