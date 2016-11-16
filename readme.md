@@ -13,7 +13,8 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
 
 ## Installation
 
-  `npm install pathwizard --save`
+  ~~`npm install pathwizard --save`~~
+  `npm install https://github.com/clocasto/PathWizard.git`
 
 ## Usage
 
