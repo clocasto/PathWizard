@@ -15,7 +15,15 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
 
 ## Usage
 
-  `var pw = require('pathwizard')([Project Path]=process.cwd)`
+  `var pw = require('pathwizard')([projectPath], [])`
+
+  `require('pathwizard')` is a constructor function which returns a new PathWizard instance. The constructor takes two optional parameters: absolute path to project root folder and options.
+
+  `var options = {
+  	cache: boolean,
+  	ignored: array of directory names
+  }`
+  
 
 ## Shortest Unique Path
 
