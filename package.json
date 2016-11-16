@@ -1,8 +1,7 @@
 {
   "name": "PathWizard",
   "version": "0.1.0",
-  "description": "A lightweight wrapper around `require` which finds modules and files based on the shortest unique path.
-",
+  "description": "A lightweight wrapper around `require` which finds modules and files based on the shortest unique path.",
   "main": "src/index.js",
   "keywords": [],
   "author": "@clocasto",
