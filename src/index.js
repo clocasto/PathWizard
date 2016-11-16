@@ -76,7 +76,7 @@ PathWizard.prototype.req = function (filePath) {
   try {
     mod = require(filePath);
   } catch (e) {
-    mod = require(pw.abs(filePath));
+    mod = require(this.abs(filePath));
   } finally {
     return mod;
   }

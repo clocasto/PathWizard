@@ -339,6 +339,7 @@ describe('PathWizard', function () {
       })
 
       it(`Finds './c/c/c.js' from various search expressions`, function () {
+        fse.removeSync(_root_c_c_cjs);
         fse.writeFileSync(_root_c_c_cjs, `module.exports = '${_root_c_c_cjs}'`)
 
         expect(pw.absDir('c.js')).to.eql(require(_root_c_c_cjs));
@@ -378,26 +379,18 @@ describe('PathWizard', function () {
       expect(result).to.eql(require('chai'));
     })
 
-    it('Relies on PathWizard.abs to find absolute paths', function () {
+    it('Will require a project file if a named module was not found', function () {
       const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
 
       fse.writeFileSync(_root_indexjs, `${_root_indexjs}`);
       fse.writeFileSync(_root_b_indexjs, `${_root_b_indexjs}`);
 
-      const absSpy = chai.spy.on(pw, 'abs');
-      const absDirSpy = chai.spy.on(pw, 'absDir');
-      const relSpy = chai.spy.on(pw, 'rel');
-      const relDirSpy = chai.spy.on(pw, 'relDir');
-
-      expect(absSpy).to.be.spy;
-
       const result = pw.req('c');
 
-      expect(absSpy).to.have.been.called();
-      expect(absDirSpy).to.not.have.been.called();
-      expect(relSpy).to.not.have.been.called();
-      expect(relDirSpy).to.not.have.been.called();
-      expect(result).to.eql(_root_c_c_cjs);
+      pw.req('index');
+
+      expect(result).to.eql(`${_root_c_c_cjs}`);
+      expect(pw.req.bind(pw,'index')).to.throw(`The path did not uniquely resolve! \n\n~/b/index.js\n~/c/c/index.js\n~/index.js\n`);
     })
 
   })
