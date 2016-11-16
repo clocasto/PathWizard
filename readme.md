@@ -3,6 +3,7 @@ PathWizard
 [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master)](https://coveralls.io/github/clocasto/PathWizard?branch=master)  
 A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path.
 
+## Description
 While perfectly valid, requiring and importing files using relative paths can be tedious. This tool allows a user to specify the *shortest unique path name*. 
 
 For example, if your project folder contains a `'server/db/index.js'` file, a developer can use PathWizard to grab the absolute file path (`abs`), relative file path (`rel`), or the file's module export (`req`) from just the shortest unique path of (`'index'`). However, if there were another `index.js` file in the project (`'client/index.js'`), an error would be thrown because `'index'` was not a unique path. Instead, the user could call any of the three methods with  `'db'`, *from anywhere in the project folder*, to access the file's path or export.
