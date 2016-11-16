@@ -3,7 +3,7 @@ PathWizard
 
 A lightweight wrapper around `require` which finds modules and files based on the shortest unique path.
 
-While perfectly valid, requiring and importing files using relative paths can be tedious. This tool allows a user to specify the *shortest unique path name*. For example, if your project folder contains a `'server/db/index.js'` file, one could either grab the absolute file path (`abs`), relative file path (`rel`), or the file's module export (`PathWizard.prototype.req`) by the shortest unique path of (`'index'`). However, if there were another `index.js` file in the project, an error would be thrown. Instead, the user could call any of the three methods, *from anywhere in the project folder*, with  `'db'` to access the file's path or export.
+While perfectly valid, requiring and importing files using relative paths can be tedious. This tool allows a user to specify the *shortest unique path name*. For example, if your project folder contains a `'server/db/index.js'` file, one could either grab the absolute file path (`abs`), relative file path (`rel`), or the file's module export (`req`) by the shortest unique path of (`'index'`). However, if there were another `index.js` file in the project, an error would be thrown. Instead, the user could call any of the three methods, *from anywhere in the project folder*, with  `'db'` to access the file's path or export.
 
 Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel`, `relDir`, and `req`), PathWizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cache of all directories in the file tree.
 
@@ -29,7 +29,7 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
 
 Given the following project folder structure:
 
-/test-folder
+```/test-folder
 ├── a
 │   ├── a.js
 │   └── test.js
@@ -44,7 +44,7 @@ Given the following project folder structure:
 │       ├── f.js
 │       ├── g.js
 │       └── index.js
-└── index.js
+└── index.js```
 
 Shortest Unique Filepath Results (based on the `abs` method):
 
