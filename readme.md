@@ -1,6 +1,6 @@
 PathWizard
 =========
-[![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master)](https://coveralls.io/github/clocasto/PathWizard?branch=master)  
+[![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&x=y)](https://coveralls.io/github/clocasto/PathWizard?branch=master)  
 A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path.
 
 ## Description
