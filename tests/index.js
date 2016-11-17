@@ -125,6 +125,17 @@ describe('PathWizard', function () {
       const pwNoCache = PathWizard(undefined, { cache: false });
       expect(pwNoCache.cache).to.eql(false);
 
+      //Grab directories from traverse method of new instance (keep pwCache and pwNoCache pristine)
+      const directories = PathWizard().traverse();
+      const traverse = function () { this.nodes = directories };
+
+      //Make an actual instance which we can check the mocked directories against.
+      const pwCheckDir = PathWizard();
+      pwCheckDir.abs('b');
+
+      //Mock the traverse method on the noCache instance of PathWizard
+      pwCache.traverse = traverse;
+
       const cacheSpy = chai.spy.on(pwCache, 'traverse');
       const noCacheSpy = chai.spy.on(pwNoCache, 'traverse');
 
@@ -141,18 +152,24 @@ describe('PathWizard', function () {
       pwNoCache.abs('b');
       pwNoCache.abs('b');
 
-      expect(cacheSpy).to.have.been.called.exactly(10);
-      expect(noCacheSpy).to.have.been.called.exactly(40);
+      expect(pwCheckDir.nodes).to.eql(pwCache.nodes);
+      expect(pwCheckDir.nodes).to.eql(pwNoCache.nodes);
+
+      expect(cacheSpy).to.have.been.called.once;
+      expect(noCacheSpy).to.have.been.called.min(4);
+
+      expect(pwCache.abs('b')).to.eql(_root_b_bjs);
+      expect(pwNoCache.abs('b')).to.eql(_root_b_bjs);
     })
 
     describe(`PathWizard Will Ignore Certain Directories`, function () {
 
-      it(`Using the 'ignore' method`, function() {
+      it(`Using the 'ignore' method`, function () {
 
       })
 
-      it(`Using the 'ignore' option in the PathWizard constructor`, function() {
-        
+      it(`Using the 'ignore' option in the PathWizard constructor`, function () {
+
       })
 
     })
@@ -379,18 +396,18 @@ describe('PathWizard', function () {
       expect(result).to.eql(require('chai'));
     })
 
-    xit('Will require a project file if a named module was not found', function () {
+    it('Will require a project file if a named module was not found', function () {
       const pw = PathWizard(path.join(__dirname, 'test-folder'), { cache: false });
 
+      fse.removeSync(_root_c_c_cjs);
+      fse.writeFileSync(_root_c_c_cjs, `module.exports = '${_root_c_c_cjs}'`)
+
       fse.writeFileSync(_root_indexjs, `${_root_indexjs}`);
-      fse.writeFileSync(_root_b_indexjs, `${_root_b_indexjs}`);
 
       const result = pw.req('c');
 
-      pw.req('index');
-
       expect(result).to.eql(`${_root_c_c_cjs}`);
-      expect(pw.req.bind(pw,'index')).to.throw(`The path did not uniquely resolve! \n\n~/b/index.js\n~/c/c/index.js\n~/index.js\n`);
+      expect(pw.req.bind(pw, 'index')).to.throw('The path did not uniquely resolve! \n\n~/c/c/index.js\n~/index.js\n');
     })
 
   })
