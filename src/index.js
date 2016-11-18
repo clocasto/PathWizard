@@ -207,4 +207,4 @@ function PathWizardModule(rootPath) {
 
 module.exports = PathWizardModule;
 
-delete require.cache[__filename];
+if (require.cache && __filename) delete require.cache[__filename];
