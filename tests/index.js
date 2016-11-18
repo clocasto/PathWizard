@@ -155,7 +155,7 @@ describe('PathWizard', function () {
       expect(pwCheckDir.nodes).to.eql(pwCache.nodes);
       expect(pwCheckDir.nodes).to.eql(pwNoCache.nodes);
 
-      expect(cacheSpy).to.have.been.called.once;
+      expect(cacheSpy).to.have.been.called.exactly(0);
       expect(noCacheSpy).to.have.been.called.min(4);
 
       expect(pwCache.abs('b')).to.eql(_root_b_bjs);

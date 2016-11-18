@@ -21,10 +21,7 @@ PathWizard.prototype.abs = function (filePath) {
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
 
-  if (this.cache && !this.nodes.length) {
-    this.traverse();
-    prependRoot.bind(this)();
-  } else if (!this.cache) {
+  if (!this.cache) {
     this.nodes = [];
     this.traverse();
     prependRoot.bind(this)();
@@ -176,12 +173,16 @@ function err(filePath, matches) {
     throw `The path did not uniquely resolve! ${'\n\n'}${matches.map (match => path.join(...match)).join('\n')}${'\n'}`;
 }
 
-function PathWizardModule(rootPath, options) {
+function PathWizardModule(rootPath, { cache = true, ignored = ['node_modules', 'bower_components'] } = {}) {
   if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  return new PathWizard(rootPath, options);
+  const _PathWizard = new PathWizard(rootPath, { cache, ignored });
+  if (!!cache) {
+    _PathWizard.traverse();
+    prependRoot.call(_PathWizard);
+  }
+  return _PathWizard;
 }
 
 module.exports = PathWizardModule;
 
-delete require.cache[__filename];
-
+if (require.cache && __filename) delete require.cache[__filename];

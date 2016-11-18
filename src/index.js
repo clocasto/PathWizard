@@ -35,10 +35,7 @@ PathWizard.prototype.abs = function (filePath) {
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
 
-  if (this.cache && !this.nodes.length) {
-    this.traverse();
-    prependRoot.bind(this)();
-  } else if (!this.cache) {
+  if (!this.cache) {
     this.nodes = [];
     this.traverse();
     prependRoot.bind(this)();
@@ -192,9 +189,20 @@ function err(filePath, matches) {
   }).join('\n') + '\n';
 }
 
-function PathWizardModule(rootPath, options) {
+function PathWizardModule(rootPath) {
+  var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref2$cache = _ref2.cache,
+      cache = _ref2$cache === undefined ? true : _ref2$cache,
+      _ref2$ignored = _ref2.ignored,
+      ignored = _ref2$ignored === undefined ? ['node_modules', 'bower_components'] : _ref2$ignored;
+
   if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  return new PathWizard(rootPath, options);
+  var _PathWizard = new PathWizard(rootPath, { cache: cache, ignored: ignored });
+  if (!!cache) {
+    _PathWizard.traverse();
+    prependRoot.call(_PathWizard);
+  }
+  return _PathWizard;
 }
 
 module.exports = PathWizardModule;
