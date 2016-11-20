@@ -9,20 +9,20 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
 
 ***Note***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which the `req` method relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath.
 
-#### Table of Contents
-  1. [Shortest Unique Path](#shortest_unique_path)
+#### Table of Contents  
+  1. [Shortest Unique Path](#shortest_unique_path)  
   2. [Installation](#installation)
   3. [Usage](#usage)
-  4. [API (Methods)](#api)
-    ** `abs`
-    ** `rel`
-    ** `req`
-    ** `absDir`
-    ** `relDir`
-    ** `traverse`
-    ** `ignore`
-  5. [Tests](#tests)
-  6. [Configuring](#configuring)
+  4. [API (Methods)](#api)  
+     ** `abs`  
+     ** `rel`  
+     ** `req`  
+     ** `absDir`  
+     ** `relDir`  
+     ** `traverse`  
+     ** `ignore`  
+  5. [Tests](#tests)  
+  6. [Configuring](#configuring)  
 
 ## <a href="shortest_unique_path"></a>Shortest Unique Path
 
