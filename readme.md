@@ -12,8 +12,8 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
 #### Table of Contents
   1. [Shortest Unique Path](#shortest_unique_path)
   2. [Installation](#installation)
-  3. Usage
-  4. API (Methods)
+  3. [Usage](#usage)
+  4. [API (Methods)](#api)
     ** `abs`
     ** `rel`
     ** `req`
@@ -21,8 +21,8 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
     ** `relDir`
     ** `traverse`
     ** `ignore`
-  5. Tests
-  6. Configuring
+  5. [Tests](#tests)
+  6. [Configuring](#configuring)
 
 ## <a href="shortest_unique_path"></a>Shortest Unique Path
 
