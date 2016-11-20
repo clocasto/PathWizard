@@ -9,7 +9,22 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
 
 ***Note***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which the `req` method relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath.
 
-## Shortest Unique Path
+#### Table of Contents
+  1. [Shortest Unique Path](#shortest_unique_path)
+  2. [Installation](#installation)
+  3. Usage
+  4. API (Methods)
+    ** `abs`
+    ** `rel`
+    ** `req`
+    ** `absDir`
+    ** `relDir`
+    ** `traverse`
+    ** `ignore`
+  5. Tests
+  6. Configuring
+
+## <a href="shortest_unique_path"></a>Shortest Unique Path
 
 Given the following project folder structure:
 
@@ -39,12 +54,12 @@ Search String | Result | Reason
 `'index'` or `'index.js'`  | `throw new Error()`. | Index is not a unique path.  
 `'b'`                    | `'test-folder/b/b.js'`. | Like `require`, `b.js` is prioritized over `b/index.js`.  
 
-## Installation
+## <a href="#installation"></a>Installation
 
   ~~`npm install pathwizard --save`~~  
   `npm install https://github.com/clocasto/PathWizard.git`
 
-## Usage
+## <a href="usage"></a>Usage
 
   `var pw = require('pathwizard')()`
 
@@ -55,7 +70,7 @@ Search String | Result | Reason
   	ignored: array of directory names
   }`
 
-## API (Methods)
+## <a href="api"></a>API (Methods)
 
 **abs**  
 This method returns the absolute path of a matching **file**. This method does *not* match folders, but can find matching files within arbitrarily-named, nested folders.
@@ -78,11 +93,11 @@ This method returns an array of all directory paths (files *and* folders) in the
 **ignore**  
 This method adds the provided directory name (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
 
-## Tests
+## <a href="tests"></a>Tests
 
   npm test
 
-## Contributing
+## <a href="contributing"></a>Contributing
 
 Please use the AirBNB style guide for consistency. Add unit tests for any new or changed functionality. Lint and test your code.
 
