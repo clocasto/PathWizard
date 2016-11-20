@@ -1,9 +1,7 @@
 PathWizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch=master)](https://travis-ci.org/clocasto/PathWizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&x=y)](https://coveralls.io/github/clocasto/PathWizard?branch=master)
 =========
 
-A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path.
-
-PathWizard makes requiring modules and relative/absolute path finding simpler. Instead of 
+A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path. Instead of hard-coding string literals for relative module paths when using `require`, just specify the shortest, unique segment of a path and PathWizard will find the correct full path.
 
 ***Note***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which the `req` method relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath.
 
