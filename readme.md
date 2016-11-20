@@ -14,13 +14,13 @@ Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel
   2. [Installation](#installation)
   3. [Usage](#usage)
   4. [API (Methods)](#api)  
-     ** `abs`  
-     ** `rel`  
-     ** `req`  
-     ** `absDir`  
-     ** `relDir`  
-     ** `traverse`  
-     ** `ignore`  
+     * `abs`  
+     * `rel`  
+     * `req`  
+     * `absDir`  
+     * `relDir`  
+     * `traverse`  
+     * `ignore`  
   5. [Tests](#tests)  
   6. [Configuring](#configuring)  
 
