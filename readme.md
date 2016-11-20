@@ -7,7 +7,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
 
 #### Table of Contents  
   0. [Introduction](#introduction)
-  1. [Shortest Unique Path](#shortest_unique_path)  
+  1. [Shortest Unique Path](#shortest-unique-path)  
   2. [Installation](#installation)
   3. [Usage](#usage)
   4. [API (Methods)](#api)  
@@ -27,7 +27,7 @@ PathWizard makes requiring modules and relative/absolute path finding simpler. A
 
 Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel`, `relDir`, and `req`), PathWizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cache of all discovered directories.
 
-## <a href="shortest_unique_path"></a>Shortest Unique Path
+## <a href="shortest-unique-path"></a>Shortest Unique Path
 
 Given the following project folder structure:
 
@@ -50,7 +50,7 @@ Given the following project folder structure:
 
 Shortest Unique Filepath Results (based on the `abs` method):
 
-Search String | Result | Reason
+Search String | Output | Status
 ---------------------|-------------|------------
 `'g'` or `'g.js'`          | `'/test-folder/c/c/g.js'`  | Success!
 `'c/c'`, `'c/c/c'` or `'c'`| `'/test-folder/c/c/c.js'`  | Success!
