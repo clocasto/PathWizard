@@ -1,33 +1,17 @@
-'use strict';
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
 
 module.exports = PathWizardModule;
 
 if (require.cache && __filename) delete require.cache[__filename];
 
-function PathWizardModule() {
-  var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : module.parent.require;
-  var rootPath = arguments[1];
-  var options = arguments[2];
-
+function PathWizardModule(target = module.parent.require, rootPath, options) {
   if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  var _PathWizard = new PathWizard(rootPath, options);
+  const _PathWizard = new PathWizard(rootPath, options);
   return _PathWizard.proxy(target);
 }
 
-function PathWizard() {
-  var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
-
-  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      _ref$cache = _ref.cache,
-      cache = _ref$cache === undefined ? true : _ref$cache,
-      _ref$ignored = _ref.ignored,
-      ignored = _ref$ignored === undefined ? ['node_modules', 'bower_components'] : _ref$ignored;
-
+function PathWizard(rootPath = process.cwd(), { cache = true, ignored = ['node_modules', 'bower_components'] } = {}) {
   this.root = rootPath;
   this.ignored = ignored;
   this.cache = !!cache;
@@ -35,12 +19,10 @@ function PathWizard() {
 }
 
 PathWizard.prototype.abs = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
+  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
-  var _filePath = void 0,
-      _filePathWithIndex = void 0,
-      matches = void 0;
+  let _filePath, _filePathWithIndex, matches;
   if (filePath === '/') {
     _filePath = ['index.js'];
   } else {
@@ -53,29 +35,31 @@ PathWizard.prototype.abs = function (filePath) {
     this.nodes = traverse(this.root, this.ignored);
   }
 
-  var target = _filePath[_filePath.length - 1];
+  let target = _filePath[_filePath.length - 1];
   if (target.indexOf('.') < 0) {
-    _filePath.push(_filePath.pop() + '.js');
+    _filePath.push(`${_filePath.pop()}.js`);
     _filePathWithIndex = _filePath.slice();
-    _filePathWithIndex.push(_filePathWithIndex.pop().replace(/\.\w+/, ''), 'index.js');
+    _filePathWithIndex.push(_filePathWithIndex.pop()
+      .replace(/\.\w+/, ''), 'index.js');
   }
 
-  matches = findMatchingDirectories.bind(this)(_filePath);
-  if (!matches.length && _filePathWithIndex) matches = findMatchingDirectories.bind(this)(_filePathWithIndex);
-  if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
-};
+  matches = findMatchingDirectories(this.nodes, _filePath);
+  if (!matches.length && _filePathWithIndex)
+    matches = findMatchingDirectories(this.nodes, _filePathWithIndex);
+  if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
+  else err(this.root, filePath, matches);
+}
 
 PathWizard.prototype.rel = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
+  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
-  var _to = path.normalize(this.abs(filePath));
-  var _from = module.parent.filename;
-  var rel = path.relative(_from, _to).slice(3);
+  const _to = path.normalize(this.abs(filePath));
+  const _from = module.parent.filename;
+  const rel = path.relative(_from, _to).slice(3);
 
-  return (/\.\./.test(rel) ? rel : './' + rel
-  );
-};
+  return /\.\./.test(rel) ? rel : `./${rel}`;
+}
 
 PathWizard.prototype.ignore = function (expressions) {
   ignorePath(expressions, this.ignored);
@@ -83,11 +67,10 @@ PathWizard.prototype.ignore = function (expressions) {
 };
 
 PathWizard.prototype.absDir = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
+  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
-  var _filePath = void 0,
-      matches = void 0;
+  let _filePath, matches;
   if (filePath === '/') {
     return path.normalize(this.root);
   } else {
@@ -101,125 +84,48 @@ PathWizard.prototype.absDir = function (filePath) {
     this.nodes = traverse(this.root, this.ignored);
   }
 
-  matches = findMatchingDirectories.bind(this)(_filePath);
-  if (matches.length === 1) return path.join.apply(path, [this.root].concat(_toConsumableArray(matches.pop().slice(1))));else err.bind(this)(filePath, matches);
+  matches = findMatchingDirectories(this.nodes, _filePath);
+  if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
+  else err(this.root, filePath, matches);
 };
 
 PathWizard.prototype.relDir = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
+  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
 
-  var to = path.normalize(this.absDir(filePath));
-  var rel = path.relative('', to);
+  const to = path.normalize(this.absDir(filePath));
+  const rel = path.relative('', to);
 
-  return (/\.\./.test(rel) ? rel : './' + rel
-  );
+  return /\.\./.test(rel) ? rel : `./${rel}`;
 };
 
 PathWizard.prototype.proxy = function (target) {
-  var _this = this;
-
   return new Proxy(target, {
-    apply: function apply(target, thisArg, argumentList) {
-      return req.apply(undefined, [target, _this.abs.bind(_this)].concat(_toConsumableArray(argumentList)));
-    },
-    get: function get(target, property) {
+    apply: (target, thisArg, argumentList) => req(target, this.abs.bind(this), ...argumentList),
+    get: (target, property) => {
       switch (property) {
         case 'abs':
-          return _this.abs.bind(_this);
+          return this.abs.bind(this);
         case 'absDir':
-          return _this.absDir.bind(_this);
+          return this.absDir.bind(this);
         case 'rel':
-          return _this.rel.bind(_this);
+          return this.rel.bind(this);
         case 'relDir':
-          return _this.relDir.bind(_this);
+          return this.relDir.bind(this);
         case 'ignore':
-          return _this.ignore.bind(_this);
+          return this.ignore.bind(this);
         case 'root':
-          return _this.root;
+          return this.root;
         case 'nodes':
-          return _this.nodes;
+          return this.nodes;
         case 'cache':
-          return _this.cache;
+          return this.cache;
         case 'ignored':
-          return _this.ignored;
+          return this.ignored;
         default:
           return target[property];
       }
     }
-  });
-};
-
-function traverse() {
-  var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
-  var ignoredArray = arguments[1];
-  var directory = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
-  var nodesArray = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-
-  var nodes = fs.readdirSync(path.join(rootPath, directory)).filter(function (n) {
-    var name = n.split(path.sep).pop();
-    return !isPathIgnored(name, ignoredArray);
-  });
-
-  nodes.forEach(function (node) {
-    if (fs.statSync(path.join(rootPath, directory, node)).isDirectory()) {
-      traverse(rootPath, ignoredArray, path.join(directory, node), nodesArray);
-    }
-    nodesArray.push(path.join(directory, node).split(path.sep));
-  });
-  return nodesArray.map(prependRoot);
+  })
 }
 
-function req(target, findingFunction, filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'req\' method.');
-  if (!filePath.length) throw new Error('The \'req\' method requires a non-empty string or array search expression.');
-
-  var mod = void 0;
-  try {
-    mod = target(filePath);
-  } catch (e) {
-    mod = target(findingFunction(filePath));
-  }
-  return mod;
-};
-
-function findMatchingDirectories(_filePath) {
-  var matches = [];
-  this.nodes.forEach(function (node) {
-    var _path = _filePath.slice();
-    var _node = node.slice();
-    while (_path.length) {
-      if (_path.pop() !== _node.pop()) return;
-    }
-    matches.push(node);
-  });
-  return matches;
-}
-
-function isPathIgnored(pathSegment, ignoredArray) {
-  if (pathSegment[0] === '.') return true;
-  return ignoredArray.some(function (element) {
-    return element === pathSegment;
-  });
-}
-
-function ignorePath(pathSegment, ignored) {
-  if (Array.isArray(pathSegment)) {
-    pathSegment.forEach(function (exp) {
-      if (typeof exp !== 'string') 'Ignored files and directories must be strings.' + '\n';
-    });
-    ignored.push.apply(ignored, _toConsumableArray(pathSegment));
-  }
-  ignored.push(pathSegment);
-}
-
-function prependRoot(node) {
-  if (node[0] !== '~') node.unshift('~');
-  return node;
-}
-
-function err(filePath, matches) {
-  if (!matches.length) throw 'No files in ' + this.root + ' matched ' + filePath + '\n';else throw 'The path did not uniquely resolve! ' + '\n\n' + matches.map(function (match) {
-    return path.join.apply(path, _toConsumableArray(match));
-  }).join('\n') + '\n';
-}

@@ -3,11 +3,11 @@ PathWizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch
 
 A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path.
 
-PathWizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, from just the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` was not a unique path. Instead, the user might specify `'db'` to PathWizard, *from anywhere in the project folder*, to access the file's path or export.
+PathWizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, from just the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` would not be a unique path. Instead, the user might specify `'db'` to PathWizard, *from anywhere in the project folder*, to access the file's path or export.
 
-Upon the first invocation of one of its searching methods (`abs`, `absDir`, `rel`, `relDir`, and `req`), PathWizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cache of all discovered directories.
+Upon the first invocation of it (PathWizard is a proxy around a module's `require` function) or one of its searching methods (`abs`, `absDir`, `rel`, `relDir`), PathWizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cache of all discovered directories.
 
-***Note***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which the `req` method relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath.
+***Note***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which PathWizard relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath.
 
 ## Shortest Unique Path
 
@@ -46,9 +46,9 @@ Search String | Result | Reason
 
 ## Usage
 
-  `var pw = require('pathwizard')()`
+  `require = require('pathwizard')(require, rootPath, options)`
 
-  `require('pathwizard')` is a constructor function which returns a new PathWizard instance. The constructor takes two optional parameters: absolute path to project root folder and options.
+  `require('pathwizard')` is a constructor function which returns a new PathWizard instance (a proxy around the passed-in `require` function). The constructor takes two additional optional parameters: absolute path to project root folder and options.
 
   `var options = {
   	cache: boolean,
@@ -82,4 +82,4 @@ Please use the AirBNB style guide for consistency. Add unit tests for any new or
 
 ## Release History
 
-* 0.0.1 Development
+* 0.1.0 Development
