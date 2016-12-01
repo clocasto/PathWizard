@@ -5,6 +5,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var fs = require('fs');
 var path = require('path');
 
+module.exports = PathWizardModule;
+
+if (require.cache && __filename) delete require.cache[__filename];
+
+function PathWizardModule() {
+  var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : module.parent.require;
+  var rootPath = arguments[1];
+  var options = arguments[2];
+
+  if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
+  var _PathWizard = new PathWizard(rootPath, options);
+  return _PathWizard.proxy(target);
+}
+
 function PathWizard() {
   var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
 
@@ -16,8 +30,8 @@ function PathWizard() {
 
   this.root = rootPath;
   this.ignored = ignored;
-  this.nodes = [];
   this.cache = !!cache;
+  this.nodes = this.cache ? traverse(this.root, this.ignored) : [];
 }
 
 PathWizard.prototype.abs = function (filePath) {
@@ -36,9 +50,7 @@ PathWizard.prototype.abs = function (filePath) {
   }
 
   if (!this.cache) {
-    this.nodes = [];
-    this.traverse();
-    prependRoot.bind(this)();
+    this.nodes = traverse(this.root, this.ignored);
   }
 
   var target = _filePath[_filePath.length - 1];
@@ -65,21 +77,8 @@ PathWizard.prototype.rel = function (filePath) {
   );
 };
 
-PathWizard.prototype.req = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'req\' method.');
-  if (!filePath.length) throw new Error('The \'req\' method requires a non-empty string or array search expression.');
-
-  var mod = void 0;
-  try {
-    mod = require(filePath);
-  } catch (e) {
-    mod = require(this.abs(filePath));
-  }
-  return mod;
-};
-
 PathWizard.prototype.ignore = function (expressions) {
-  ignorePath.bind(this)(expressions);
+  ignorePath(expressions, this.ignored);
   return this;
 };
 
@@ -97,12 +96,9 @@ PathWizard.prototype.absDir = function (filePath) {
     if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
   }
   if (this.cache && !this.nodes.length) {
-    this.traverse();
-    prependRoot.bind(this)();
+    this.nodes = traverse(this.root, this.ignored);
   } else if (!this.cache) {
-    this.nodes = [];
-    this.traverse();
-    prependRoot.bind(this)();
+    this.nodes = traverse(this.root, this.ignored);
   }
 
   matches = findMatchingDirectories.bind(this)(_filePath);
@@ -120,28 +116,71 @@ PathWizard.prototype.relDir = function (filePath) {
   );
 };
 
-PathWizard.prototype.flush = function () {
-  this.nodes = [];
-  return this;
-};
-
-PathWizard.prototype.traverse = function () {
+PathWizard.prototype.proxy = function (target) {
   var _this = this;
 
-  var directory = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+  return new Proxy(target, {
+    apply: function apply(target, thisArg, argumentList) {
+      return req.apply(undefined, [target, _this.abs.bind(_this)].concat(_toConsumableArray(argumentList)));
+    },
+    get: function get(target, property) {
+      switch (property) {
+        case 'abs':
+          return _this.abs.bind(_this);
+        case 'absDir':
+          return _this.absDir.bind(_this);
+        case 'rel':
+          return _this.rel.bind(_this);
+        case 'relDir':
+          return _this.relDir.bind(_this);
+        case 'ignore':
+          return _this.ignore.bind(_this);
+        case 'root':
+          return _this.root;
+        case 'nodes':
+          return _this.nodes;
+        case 'cache':
+          return _this.cache;
+        case 'ignored':
+          return _this.ignored;
+        default:
+          return target[property];
+      }
+    }
+  });
+};
 
-  var nodes = fs.readdirSync(path.join(this.root, directory)).filter(function (n) {
+function traverse() {
+  var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
+  var ignoredArray = arguments[1];
+  var directory = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
+  var nodesArray = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+
+  var nodes = fs.readdirSync(path.join(rootPath, directory)).filter(function (n) {
     var name = n.split(path.sep).pop();
-    return !isPathIgnored.bind(_this)(name);
+    return !isPathIgnored(name, ignoredArray);
   });
 
   nodes.forEach(function (node) {
-    if (fs.statSync(path.join(_this.root, directory, node)).isDirectory()) {
-      _this.traverse.bind(_this)(path.join(directory, node));
+    if (fs.statSync(path.join(rootPath, directory, node)).isDirectory()) {
+      traverse(rootPath, ignoredArray, path.join(directory, node), nodesArray);
     }
-    _this.nodes.push(path.join(directory, node).split(path.sep));
+    nodesArray.push(path.join(directory, node).split(path.sep));
   });
-  return this.nodes;
+  return nodesArray.map(prependRoot);
+}
+
+function req(target, findingFunction, filePath) {
+  if (!filePath) throw new Error('A search expression must be provided to the \'req\' method.');
+  if (!filePath.length) throw new Error('The \'req\' method requires a non-empty string or array search expression.');
+
+  var mod = void 0;
+  try {
+    mod = target(filePath);
+  } catch (e) {
+    mod = target(findingFunction(filePath));
+  }
+  return mod;
 };
 
 function findMatchingDirectories(_filePath) {
@@ -157,30 +196,26 @@ function findMatchingDirectories(_filePath) {
   return matches;
 }
 
-function isPathIgnored(pathSegment) {
+function isPathIgnored(pathSegment, ignoredArray) {
   if (pathSegment[0] === '.') return true;
-  return this.ignored.some(function (element) {
+  return ignoredArray.some(function (element) {
     return element === pathSegment;
   });
 }
 
-function ignorePath(pathSegment) {
+function ignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
-    var _ignored;
-
     pathSegment.forEach(function (exp) {
       if (typeof exp !== 'string') 'Ignored files and directories must be strings.' + '\n';
     });
-    (_ignored = this.ignored).push.apply(_ignored, _toConsumableArray(pathSegment));
+    ignored.push.apply(ignored, _toConsumableArray(pathSegment));
   }
-  this.ignored.push(pathSegment);
+  ignored.push(pathSegment);
 }
 
-function prependRoot() {
-  this.nodes = this.nodes.map(function (node) {
-    node.unshift('~');
-    return node;
-  });
+function prependRoot(node) {
+  if (node[0] !== '~') node.unshift('~');
+  return node;
 }
 
 function err(filePath, matches) {
@@ -188,23 +223,3 @@ function err(filePath, matches) {
     return path.join.apply(path, _toConsumableArray(match));
   }).join('\n') + '\n';
 }
-
-function PathWizardModule(rootPath) {
-  var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      _ref2$cache = _ref2.cache,
-      cache = _ref2$cache === undefined ? true : _ref2$cache,
-      _ref2$ignored = _ref2.ignored,
-      ignored = _ref2$ignored === undefined ? ['node_modules', 'bower_components'] : _ref2$ignored;
-
-  if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  var _PathWizard = new PathWizard(rootPath, { cache: cache, ignored: ignored });
-  if (!!cache) {
-    _PathWizard.traverse();
-    prependRoot.call(_PathWizard);
-  }
-  return _PathWizard;
-}
-
-module.exports = PathWizardModule;
-
-if (require.cache && __filename) delete require.cache[__filename];

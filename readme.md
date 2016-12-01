@@ -63,17 +63,11 @@ This method returns the absolute path of a matching **file**. This method does *
 **rel**  
 This method returns the relative path *from the file invoking 'rel'* to the matching **file**. This method does *not* match folders, but can find matching files within arbitrarily-named, nested folders.
 
-**req**  
-This method returns a module based on either a matching installed module *or* a matching file. This method uses the `abs` method to find matching files.
-
 **absDir**  
 This method returns the absolute path of a matching *folder*. This method does *not* match **files**.
 
 **relDir**  
 This method returns the relative path of a matching *folder*. This method does *not* match **files**.
-
-**traverse**  
-This method returns an array of all directory paths (files *and* folders) in the PathWizard instance's root directory.  
 
 **ignore**  
 This method adds the provided directory name (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
