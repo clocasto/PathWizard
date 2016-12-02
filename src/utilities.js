@@ -1,3 +1,8 @@
+function checkSearchTerm(filePath, method) {
+  if (!filePath) throw new Error(`A search expression must be provided to the '${method}' method.`);
+  if (!filePath.length) throw new Error(`The '${method}' method requires a non-empty string.`);
+}
+
 function err(rootPath, filePath, matches) {
   if (!matches.length)
     throw `No files in ${rootPath} matched ${filePath}${'\n'}`;
@@ -56,9 +61,8 @@ function traverse(rootPath = process.cwd(), ignoredArray, directory = '', nodesA
   return nodesArray.map(prependRoot);
 }
 
-function req(target, findingFunction, filePath) {
-  if (!filePath) throw new Error(`A search expression must be provided to the 'req' method.`);
-  if (!filePath.length) throw new Error(`The 'req' method requires a non-empty string or array search expression.`);
+function requireModule(target, findingFunction, filePath) {
+  checkSearchTerm(filePath, 'requireModule');
 
   let mod;
   try {

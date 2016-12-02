@@ -18,10 +18,7 @@ function PathWizard(rootPath = process.cwd(), { cache = true, ignored = ['node_m
   this.nodes = this.cache ? traverse(this.root, this.ignored) : [];
 }
 
-PathWizard.prototype.abs = function (filePath) {
-  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
-  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
-
+PathWizard.prototype.abs = function(filePath) {
   let _filePath, _filePathWithIndex, matches;
   if (filePath === '/') {
     _filePath = ['index.js'];
@@ -50,9 +47,8 @@ PathWizard.prototype.abs = function (filePath) {
   else err(this.root, filePath, matches);
 }
 
-PathWizard.prototype.rel = function (filePath) {
-  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
-  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
+PathWizard.prototype.rel = function(filePath) {
+  checkSearchTerm(filePath, 'rel');
 
   const _to = path.normalize(this.abs(filePath));
   const _from = module.parent.filename;
@@ -61,14 +57,13 @@ PathWizard.prototype.rel = function (filePath) {
   return /\.\./.test(rel) ? rel : `./${rel}`;
 }
 
-PathWizard.prototype.ignore = function (expressions) {
+PathWizard.prototype.ignore = function(expressions) {
   ignorePath(expressions, this.ignored);
   return this;
 };
 
-PathWizard.prototype.absDir = function (filePath) {
-  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
-  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
+PathWizard.prototype.absDir = function(filePath) {
+  checkSearchTerm(filePath, 'absDir');
 
   let _filePath, matches;
   if (filePath === '/') {
@@ -89,9 +84,8 @@ PathWizard.prototype.absDir = function (filePath) {
   else err(this.root, filePath, matches);
 };
 
-PathWizard.prototype.relDir = function (filePath) {
-  if (!filePath) throw new Error(`A search expression must be provided to the 'abs' method.`);
-  if (!filePath.length) throw new Error(`The 'abs' method requires a non-empty string.`);
+PathWizard.prototype.relDir = function(filePath) {
+  checkSearchTerm(filePath, 'relDir');
 
   const to = path.normalize(this.absDir(filePath));
   const rel = path.relative('', to);
@@ -99,9 +93,9 @@ PathWizard.prototype.relDir = function (filePath) {
   return /\.\./.test(rel) ? rel : `./${rel}`;
 };
 
-PathWizard.prototype.proxy = function (target) {
+PathWizard.prototype.proxy = function(target) {
   return new Proxy(target, {
-    apply: (target, thisArg, argumentList) => req(target, this.abs.bind(this), ...argumentList),
+    apply: (target, thisArg, argumentList) => requireModule(target, this.abs.bind(this), ...argumentList),
     get: (target, property) => {
       switch (property) {
         case 'abs':
@@ -122,6 +116,8 @@ PathWizard.prototype.proxy = function (target) {
           return this.cache;
         case 'ignored':
           return this.ignored;
+        case 'target':
+          return this;
         default:
           return target[property];
       }

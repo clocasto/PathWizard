@@ -35,9 +35,6 @@ function PathWizard() {
 }
 
 PathWizard.prototype.abs = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
-
   var _filePath = void 0,
       _filePathWithIndex = void 0,
       matches = void 0;
@@ -66,8 +63,7 @@ PathWizard.prototype.abs = function (filePath) {
 };
 
 PathWizard.prototype.rel = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+  checkSearchTerm(filePath, 'rel');
 
   var _to = path.normalize(this.abs(filePath));
   var _from = module.parent.filename;
@@ -83,8 +79,7 @@ PathWizard.prototype.ignore = function (expressions) {
 };
 
 PathWizard.prototype.absDir = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+  checkSearchTerm(filePath, 'absDir');
 
   var _filePath = void 0,
       matches = void 0;
@@ -106,8 +101,7 @@ PathWizard.prototype.absDir = function (filePath) {
 };
 
 PathWizard.prototype.relDir = function (filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'abs\' method.');
-  if (!filePath.length) throw new Error('The \'abs\' method requires a non-empty string.');
+  checkSearchTerm(filePath, 'relDir');
 
   var to = path.normalize(this.absDir(filePath));
   var rel = path.relative('', to);
@@ -121,7 +115,7 @@ PathWizard.prototype.proxy = function (target) {
 
   return new Proxy(target, {
     apply: function apply(target, thisArg, argumentList) {
-      return req.apply(undefined, [target, _this.abs.bind(_this)].concat(_toConsumableArray(argumentList)));
+      return requireModule.apply(undefined, [target, _this.abs.bind(_this)].concat(_toConsumableArray(argumentList)));
     },
     get: function get(target, property) {
       switch (property) {
@@ -143,6 +137,8 @@ PathWizard.prototype.proxy = function (target) {
           return _this.cache;
         case 'ignored':
           return _this.ignored;
+        case 'target':
+          return _this;
         default:
           return target[property];
       }
@@ -152,6 +148,11 @@ PathWizard.prototype.proxy = function (target) {
 'use strict';
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function checkSearchTerm(filePath, method) {
+  if (!filePath) throw new Error('A search expression must be provided to the \'' + method + '\' method.');
+  if (!filePath.length) throw new Error('The \'' + method + '\' method requires a non-empty string.');
+}
 
 function err(rootPath, filePath, matches) {
   if (!matches.length) throw 'No files in ' + rootPath + ' matched ' + filePath + '\n';else throw 'The path did not uniquely resolve! ' + '\n\n' + matches.map(function (match) {
@@ -216,9 +217,8 @@ function traverse() {
   return nodesArray.map(prependRoot);
 }
 
-function req(target, findingFunction, filePath) {
-  if (!filePath) throw new Error('A search expression must be provided to the \'req\' method.');
-  if (!filePath.length) throw new Error('The \'req\' method requires a non-empty string or array search expression.');
+function requireModule(target, findingFunction, filePath) {
+  checkSearchTerm(filePath, 'requireModule');
 
   var mod = void 0;
   try {
