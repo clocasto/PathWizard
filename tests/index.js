@@ -27,7 +27,9 @@ let _root,
 describe('PathWizard', function() {
 
   before('Assemble a test file tree', function() {
+    
     _root = path.join(__dirname, './test-folder');
+    fse.removeSync(_root);
     fse.mkdirSync(_root);
 
     _root_a = path.join(_root, 'a');
