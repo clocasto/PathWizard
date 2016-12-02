@@ -1,4 +1,4 @@
-PathWizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch=master)](https://travis-ci.org/clocasto/PathWizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&x=y)](https://coveralls.io/github/clocasto/PathWizard?branch=master)
+PathWizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch=master)](https://travis-ci.org/clocasto/PathWizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&default=default)](https://coveralls.io/github/clocasto/PathWizard?branch=master)
 =========
 
 A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path. Instead of hard-coding string literals for relative module paths when using `require`, just specify the shortest, unique segment of a path and PathWizard will find the correct full path.
@@ -16,6 +16,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
      * `absDir`  
      * `relDir`  
      * `ignore`  
+     * `unignore`  
   5. [Tests](#tests)  
   6. [Configuring](#configuring)  
   
@@ -85,7 +86,10 @@ This method returns the absolute path of a matching *folder*. This method does *
 This method returns the relative path of a matching *folder*. This method does *not* match **files**.
 
 **ignore**  
-This method adds the provided directory name (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
+This method adds the provided directory name, or array of directory names, (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
+
+**unignore**  
+This method removes the provided directory name, or array of directory names, (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
 
 ## <a href="tests"></a>Tests
 
@@ -97,4 +101,4 @@ Please use the AirBNB style guide for consistency. Add unit tests for any new or
 
 ## Release History
 
-* 0.1.0 Development
+* 0.1.1 Development

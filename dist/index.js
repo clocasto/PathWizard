@@ -73,11 +73,6 @@ PathWizard.prototype.rel = function (filePath) {
   );
 };
 
-PathWizard.prototype.ignore = function (expressions) {
-  ignorePath(expressions, this.ignored);
-  return this;
-};
-
 PathWizard.prototype.absDir = function (filePath) {
   checkSearchTerm(filePath, 'absDir');
 
@@ -110,6 +105,16 @@ PathWizard.prototype.relDir = function (filePath) {
   );
 };
 
+PathWizard.prototype.ignore = function (expressions) {
+  ignorePath(expressions, this.ignored);
+  return this;
+};
+
+PathWizard.prototype.unignore = function (expressions) {
+  unignorePath(expressions, this.ignored);
+  return this;
+};
+
 PathWizard.prototype.proxy = function (target) {
   var _this = this;
 
@@ -129,6 +134,8 @@ PathWizard.prototype.proxy = function (target) {
           return _this.relDir.bind(_this);
         case 'ignore':
           return _this.ignore.bind(_this);
+        case 'unignore':
+          return _this.unignore.bind(_this);
         case 'root':
           return _this.root;
         case 'nodes':
@@ -137,8 +144,6 @@ PathWizard.prototype.proxy = function (target) {
           return _this.cache;
         case 'ignored':
           return _this.ignored;
-        case 'target':
-          return _this;
         default:
           return target[property];
       }
@@ -177,17 +182,19 @@ function findMatchingDirectories(nodeArray, _filePath) {
 
 function ignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
-    pathSegment.forEach(function (exp) {
-      if (typeof exp !== 'string') 'Ignored files and directories must be strings.' + '\n';
+    pathSegment.forEach(function (expression) {
+      if (typeof expression !== 'string') throw 'Ignored files and directories must be strings.' + '\n';
+      if (!isPathIgnored(expression, ignored)) ignored.push(expression);
     });
-    ignored.push.apply(ignored, _toConsumableArray(pathSegment));
-  }
-  ignored.push(pathSegment);
+  } else if (typeof pathSegment === 'string') {
+    if (!isPathIgnored(pathSegment, ignored)) ignored.push(pathSegment);
+  } else throw 'Invalid argument type provided to \'ignore\' method. Ignore expressions must be a string or an array of strings!';
+  return null;
 }
 
-function isPathIgnored(pathSegment, ignoredArray) {
+function isPathIgnored(pathSegment, ignored) {
   if (pathSegment[0] === '.') return true;
-  return ignoredArray.some(function (element) {
+  return ignored.some(function (element) {
     return element === pathSegment;
   });
 }
@@ -228,3 +235,17 @@ function requireModule(target, findingFunction, filePath) {
   }
   return mod;
 };
+
+function unignorePath(pathSegment, ignored) {
+  if (Array.isArray(pathSegment)) {
+    pathSegment.forEach(function (expression) {
+      if (typeof expression !== 'string') throw 'Ignored files and directories must be strings.' + '\n';
+      var pathIndex = ignored.indexOf(expression);
+      if (pathIndex >= 0) ignored.splice(pathIndex, 1);
+    });
+  } else if (typeof pathSegment === 'string') {
+    var pathIndex = ignored.indexOf(pathSegment);
+    if (pathIndex >= 0) ignored.splice(pathIndex, 1);
+  } else 'Invalid argument type provided to \'ignore\' method. Ignore expressions must be a string or an array of strings!';
+  return null;
+}

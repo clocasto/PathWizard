@@ -57,11 +57,6 @@ PathWizard.prototype.rel = function(filePath) {
   return /\.\./.test(rel) ? rel : `./${rel}`;
 }
 
-PathWizard.prototype.ignore = function(expressions) {
-  ignorePath(expressions, this.ignored);
-  return this;
-};
-
 PathWizard.prototype.absDir = function(filePath) {
   checkSearchTerm(filePath, 'absDir');
 
@@ -93,6 +88,16 @@ PathWizard.prototype.relDir = function(filePath) {
   return /\.\./.test(rel) ? rel : `./${rel}`;
 };
 
+PathWizard.prototype.ignore = function(expressions) {
+  ignorePath(expressions, this.ignored);
+  return this;
+};
+
+PathWizard.prototype.unignore = function(expressions) {
+  unignorePath(expressions, this.ignored);
+  return this;
+};
+
 PathWizard.prototype.proxy = function(target) {
   return new Proxy(target, {
     apply: (target, thisArg, argumentList) => requireModule(target, this.abs.bind(this), ...argumentList),
@@ -108,6 +113,8 @@ PathWizard.prototype.proxy = function(target) {
           return this.relDir.bind(this);
         case 'ignore':
           return this.ignore.bind(this);
+        case 'unignore':
+          return this.unignore.bind(this);
         case 'root':
           return this.root;
         case 'nodes':
@@ -116,8 +123,6 @@ PathWizard.prototype.proxy = function(target) {
           return this.cache;
         case 'ignored':
           return this.ignored;
-        case 'target':
-          return this;
         default:
           return target[property];
       }
