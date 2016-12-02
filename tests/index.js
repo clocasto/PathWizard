@@ -136,7 +136,7 @@ describe('PathWizard', function() {
       expect(nonCachedNodes).to.not.equal(pwNoCache.nodes);
     })
 
-    describe(`PathWizard Will Ignore Certain Directories`, function() {
+    xdescribe(`PathWizard Will Ignore Certain Directories`, function() {
 
       it(`Using the 'ignore' method`, function() {
 
@@ -297,19 +297,6 @@ describe('PathWizard', function() {
     })
 
     describe('File matching', function() {
-
-      it('Relies on PathWizard.abs to find absolute paths', function() {
-        const absSpy = chai.spy.on(pw, 'abs');
-        const absDirSpy = chai.spy.on(pw, 'absDir');
-
-        expect(absSpy).to.be.spy;
-        expect(absDirSpy).to.be.spy;
-
-        pw.rel('c');
-
-        expect(absSpy).to.have.been.called();
-        expect(absDirSpy).to.not.have.been.called();
-      })
 
       it(`Returns a path preceded by './' or '../'`, function() {
         fse.writeFileSync(_root_c_c_cjs, `${_root_c_c_cjs}`);
