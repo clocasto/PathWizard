@@ -99,7 +99,7 @@ PathWizard.prototype.relDir = function (filePath) {
   checkSearchTerm(filePath, 'relDir');
 
   var to = path.normalize(this.absDir(filePath));
-  var rel = path.relative('', to);
+  var rel = path.relative(this.root, to);
 
   return (/\.\./.test(rel) ? rel : './' + rel
   );

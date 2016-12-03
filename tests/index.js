@@ -16,6 +16,7 @@ let _root,
   _root_a_a,
   _root_b_b,
   _root_c_c,
+  _root_a_ajs,
   _root_indexjs,
   _root_appjs,
   _root_a_testjs,
@@ -27,7 +28,7 @@ let _root,
 describe('PathWizard', function() {
 
   before('Assemble a test file tree', function() {
-    
+
     _root = path.join(__dirname, './test-folder');
     fse.removeSync(_root);
     fse.mkdirSync(_root);
@@ -48,6 +49,8 @@ describe('PathWizard', function() {
     fse.mkdirSync(_root_b_b);
     _root_c_c = path.join(_root_c, 'c');
     fse.mkdirSync(_root_c_c);
+
+    _root_a_ajs = path.join(_root_a_a, 'a.js');
 
     _root_indexjs = path.join(_root, 'index.js');
     fse.writeFileSync(_root_indexjs, `${_root_indexjs}`);
@@ -93,7 +96,7 @@ describe('PathWizard', function() {
 
   })
 
-  describe.only('Has Certain Module Methods and Functionality', function() {
+  describe('Has Certain Module Methods and Functionality', function() {
     let pw;
 
     beforeEach(() => {
@@ -325,18 +328,6 @@ describe('PathWizard', function() {
         expect(pw.absDir.bind(null, 'a')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
       })
 
-      it(`Finds './c/c/c.js' from various search expressions`, function() {
-        fse.writeFileSync(_root_c_c_cjs, `${_root_c_c_cjs}`)
-
-        expect(pw.absDir('c.js')).to.eql(_root_c_c_cjs);
-        expect(pw.absDir('c/c.js')).to.eql(_root_c_c_cjs);
-        expect(pw.absDir('./c/c')).to.eql(_root_c_c);
-        expect(pw.absDir('c/c/c.js')).to.eql(_root_c_c_cjs);
-        expect(pw.absDir('./c/c/c.js')).to.eql(_root_c_c_cjs);
-        expect(pw.absDir.bind(null, 'c')).to.throw(`The path did not uniquely resolve! \n\n~/c/c\n~/c\n`);
-        expect(pw.absDir.bind(null, 'c/c')).to.throw;
-      })
-
     })
 
   })
@@ -373,22 +364,14 @@ describe('PathWizard', function() {
     describe('Folder matching', function() {
 
       it(`Finds './test-folder/a' from various search expressions`, function() {
-        expect(pw.absDir('./a')).to.eql(_root_a);
-        expect(pw.absDir('a/a')).to.eql(_root_a_a);
-        expect(pw.absDir.bind(this, 'a')).to.throw;
-      })
+        fse.removeSync(_root_a_ajs);
+        fse.writeFileSync(_root_a_ajs, `'${_root_a_ajs}'`);
 
-      it(`Finds './c/c/c.js' from various search expressions`, function() {
-        fse.removeSync(_root_c_c_cjs);
-        fse.writeFileSync(_root_c_c_cjs, `module.exports = '${_root_c_c_cjs}'`)
+        expect(pw.relDir('./a')).to.eql('./a');
+        expect(pw.relDir('a/a')).to.eql('./a/a');
+        expect(pw.relDir.bind(this, 'a')).to.throw;
 
-        expect(pw.absDir('c.js')).to.eql(require(_root_c_c_cjs));
-        expect(pw.absDir('c/c.js')).to.eql(require(_root_c_c_cjs));
-        expect(pw.absDir('./c/c')).to.eql(_root_c_c);
-        expect(pw.absDir('c/c/c.js')).to.eql(require(_root_c_c_cjs));
-        expect(pw.absDir('./c/c/c.js')).to.eql(require(_root_c_c_cjs));
-        expect(pw.absDir.bind(this, 'c')).to.throw;
-        expect(pw.absDir.bind(this, 'c/c')).to.throw;
+        fse.removeSync(_root_a_ajs);
       })
 
     })
