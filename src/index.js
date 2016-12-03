@@ -15,17 +15,16 @@ function PathWizard(rootPath = process.cwd(), { cache = true, ignored = ['node_m
   this.root = rootPath;
   this.ignored = ignored;
   this.cache = !!cache;
-  this.nodes = this.cache ? traverse(this.root, this.ignored) : [];
+  this.nodes = this.cache ? traverse(this.root, this.ignored) : null;
 }
 
 PathWizard.prototype.abs = function(filePath) {
   let _filePath, _filePathWithIndex, matches;
-  if (filePath === '/') {
+  if (isRootPath(filePath)) {
     _filePath = ['index.js'];
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
 
   if (!this.cache) {
@@ -61,16 +60,14 @@ PathWizard.prototype.absDir = function(filePath) {
   checkSearchTerm(filePath, 'absDir');
 
   let _filePath, matches;
-  if (filePath === '/') {
+  if (isRootPath(filePath)) {
     return path.normalize(this.root);
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
-  if (this.cache && !this.nodes.length) {
-    this.nodes = traverse(this.root, this.ignored);
-  } else if (!this.cache) {
+
+  if (!this.cache) {
     this.nodes = traverse(this.root, this.ignored);
   }
 
@@ -80,10 +77,9 @@ PathWizard.prototype.absDir = function(filePath) {
 };
 
 PathWizard.prototype.relDir = function(filePath) {
-  checkSearchTerm(filePath, 'relDir');
 
   const to = path.normalize(this.absDir(filePath));
-  const rel = path.relative('', to);
+  const rel = path.relative(this.root, to);
 
   return /\.\./.test(rel) ? rel : `./${rel}`;
 };

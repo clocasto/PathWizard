@@ -31,19 +31,18 @@ function PathWizard() {
   this.root = rootPath;
   this.ignored = ignored;
   this.cache = !!cache;
-  this.nodes = this.cache ? traverse(this.root, this.ignored) : [];
+  this.nodes = this.cache ? traverse(this.root, this.ignored) : null;
 }
 
 PathWizard.prototype.abs = function (filePath) {
   var _filePath = void 0,
       _filePathWithIndex = void 0,
       matches = void 0;
-  if (filePath === '/') {
+  if (isRootPath(filePath)) {
     _filePath = ['index.js'];
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
 
   if (!this.cache) {
@@ -78,16 +77,14 @@ PathWizard.prototype.absDir = function (filePath) {
 
   var _filePath = void 0,
       matches = void 0;
-  if (filePath === '/') {
+  if (isRootPath(filePath)) {
     return path.normalize(this.root);
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
-  if (this.cache && !this.nodes.length) {
-    this.nodes = traverse(this.root, this.ignored);
-  } else if (!this.cache) {
+
+  if (!this.cache) {
     this.nodes = traverse(this.root, this.ignored);
   }
 
@@ -96,10 +93,9 @@ PathWizard.prototype.absDir = function (filePath) {
 };
 
 PathWizard.prototype.relDir = function (filePath) {
-  checkSearchTerm(filePath, 'relDir');
 
   var to = path.normalize(this.absDir(filePath));
-  var rel = path.relative('', to);
+  var rel = path.relative(this.root, to);
 
   return (/\.\./.test(rel) ? rel : './' + rel
   );
@@ -180,6 +176,19 @@ function findMatchingDirectories(nodeArray, _filePath) {
   return matches;
 }
 
+function formatPathArray(pathArray) {
+  pathArray.forEach(function (element, index) {
+    if (element.indexOf('/') >= 0) pathArray[index] = pathArray[index].replace('/', '');
+  });
+  formatTrailingDirectory(pathArray);
+  if (isRootSegment(pathArray[0])) pathArray[0] = '~';
+}
+
+function formatTrailingDirectory(pathArray) {
+  var lastElement = pathArray[pathArray.length - 1];
+  if (lastElement === '' || lastElement === '/') pathArray.pop();
+}
+
 function ignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
     pathSegment.forEach(function (expression) {
@@ -197,6 +206,30 @@ function isPathIgnored(pathSegment, ignored) {
   return ignored.some(function (element) {
     return element === pathSegment;
   });
+}
+
+function isRootPath(filePath) {
+  if (Array.isArray(filePath) && filePath.length === 1) {
+    return isRootSegment(filePath[0]);
+  } else if (typeof filePath === 'string') {
+    return isRootSegment(filePath);
+  }
+  return false;
+}
+
+function isRootSegment(pathSegment) {
+  switch (pathSegment) {
+    case '':
+      return true;
+    case '.':
+      return true;
+    case '/':
+      return true;
+    case './':
+      return true;
+    default:
+      return false;
+  };
 }
 
 function prependRoot(node) {
