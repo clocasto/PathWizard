@@ -10,40 +10,31 @@ function err(rootPath, filePath, matches) {
     throw `The path did not uniquely resolve! ${'\n\n'}${matches.map (match => path.join(...match)).join('\n')}${'\n'}`;
 }
 
-function formatPathArray(pathArray) {
-  if (pathArray[pathArray.length - 1] === '') pathArray.pop();
-  if (isRootSegment(pathArray[0])) pathArray[0] = '~';
-}
-
-function isRootSegment(pathSegment) {
-  if (pathSegment === '') return true;
-  if (pathSegment === '.') return true;
-  if (pathSegment === '/') return true;
-  if (pathSegment === './') return true;
-  return false;
-}
-
-function isRootPath(filePath) {
-  if (Array.isArray(filePath) && filePath.length === 1) {
-    return isRootSegment(filePath[0]);
-  } else if (typeof filePath === 'string') {
-    return isRootSegment(filePath);
-  }
-  return false;
-}
-
 function findMatchingDirectories(nodeArray, _filePath) {
   const matches = [];
   nodeArray.forEach(node => {
     const _path = _filePath.slice();
     const _node = node.slice();
-    // console.log('comparing', _path, 'with', _node);
     while (_path.length) {
       if (_path.pop() !== _node.pop()) return;
     }
     matches.push(node);
   })
   return matches;
+}
+
+function formatPathArray(pathArray) {
+  pathArray.forEach((element, index) => {
+    if (element.indexOf('/') >= 0) pathArray[index] = pathArray[index].replace('/', '');
+  })
+  formatTrailingDirectory(pathArray);
+  if (isRootSegment(pathArray[0])) pathArray[0] = '~';
+}
+
+
+function formatTrailingDirectory(pathArray) {
+  const lastElement = pathArray[pathArray.length - 1];
+  if (lastElement === '' || lastElement === '/') pathArray.pop();
 }
 
 function ignorePath(pathSegment, ignored) {
@@ -61,6 +52,30 @@ function ignorePath(pathSegment, ignored) {
 function isPathIgnored(pathSegment, ignored) {
   if (pathSegment[0] === '.') return true;
   return ignored.some(element => element === pathSegment);
+}
+
+function isRootPath(filePath) {
+  if (Array.isArray(filePath) && filePath.length === 1) {
+    return isRootSegment(filePath[0]);
+  } else if (typeof filePath === 'string') {
+    return isRootSegment(filePath);
+  }
+  return false;
+}
+
+function isRootSegment(pathSegment) {
+  switch (pathSegment) {
+    case '':
+      return true;
+    case '.':
+      return true;
+    case '/':
+      return true;
+    case './':
+      return true;
+    default:
+      return false;
+  };
 }
 
 function prependRoot(node) {

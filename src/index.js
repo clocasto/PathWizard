@@ -15,7 +15,7 @@ function PathWizard(rootPath = process.cwd(), { cache = true, ignored = ['node_m
   this.root = rootPath;
   this.ignored = ignored;
   this.cache = !!cache;
-  this.nodes = this.cache ? traverse(this.root, this.ignored) : [];
+  this.nodes = this.cache ? traverse(this.root, this.ignored) : null;
 }
 
 PathWizard.prototype.abs = function(filePath) {
@@ -60,15 +60,14 @@ PathWizard.prototype.absDir = function(filePath) {
   checkSearchTerm(filePath, 'absDir');
 
   let _filePath, matches;
-  if (filePath === '/' || filePath === './' || filePath === '.') {
+  if (isRootPath(filePath)) {
     return path.normalize(this.root);
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
     formatPathArray(_filePath);
   }
-  if (this.cache && !this.nodes.length) {
-    this.nodes = traverse(this.root, this.ignored);
-  } else if (!this.cache) {
+
+  if (!this.cache) {
     this.nodes = traverse(this.root, this.ignored);
   }
 
