@@ -20,12 +20,11 @@ function PathWizard(rootPath = process.cwd(), { cache = true, ignored = ['node_m
 
 PathWizard.prototype.abs = function(filePath) {
   let _filePath, _filePathWithIndex, matches;
-  if (filePath === '/') {
+  if (isRootPath(filePath)) {
     _filePath = ['index.js'];
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
 
   if (!this.cache) {
@@ -65,8 +64,7 @@ PathWizard.prototype.absDir = function(filePath) {
     return path.normalize(this.root);
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
   if (this.cache && !this.nodes.length) {
     this.nodes = traverse(this.root, this.ignored);
@@ -80,7 +78,6 @@ PathWizard.prototype.absDir = function(filePath) {
 };
 
 PathWizard.prototype.relDir = function(filePath) {
-  checkSearchTerm(filePath, 'relDir');
 
   const to = path.normalize(this.absDir(filePath));
   const rel = path.relative(this.root, to);

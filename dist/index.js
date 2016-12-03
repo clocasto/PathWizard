@@ -38,12 +38,11 @@ PathWizard.prototype.abs = function (filePath) {
   var _filePath = void 0,
       _filePathWithIndex = void 0,
       matches = void 0;
-  if (filePath === '/') {
+  if (isRootPath(filePath)) {
     _filePath = ['index.js'];
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
 
   if (!this.cache) {
@@ -82,8 +81,7 @@ PathWizard.prototype.absDir = function (filePath) {
     return path.normalize(this.root);
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    if (_filePath[_filePath.length - 1] === '') _filePath.pop();
-    if (_filePath[0] === '.' || _filePath[0] === '') _filePath[0] = '~';
+    formatPathArray(_filePath);
   }
   if (this.cache && !this.nodes.length) {
     this.nodes = traverse(this.root, this.ignored);
@@ -96,7 +94,6 @@ PathWizard.prototype.absDir = function (filePath) {
 };
 
 PathWizard.prototype.relDir = function (filePath) {
-  checkSearchTerm(filePath, 'relDir');
 
   var to = path.normalize(this.absDir(filePath));
   var rel = path.relative(this.root, to);
@@ -167,11 +164,34 @@ function err(rootPath, filePath, matches) {
   }).join('\n') + '\n';
 }
 
+function formatPathArray(pathArray) {
+  if (pathArray[pathArray.length - 1] === '') pathArray.pop();
+  if (isRootSegment(pathArray[0])) pathArray[0] = '~';
+}
+
+function isRootSegment(pathSegment) {
+  if (pathSegment === '') return true;
+  if (pathSegment === '.') return true;
+  if (pathSegment === '/') return true;
+  if (pathSegment === './') return true;
+  return false;
+}
+
+function isRootPath(filePath) {
+  if (Array.isArray(filePath) && filePath.length === 1) {
+    return isRootSegment(filePath[0]);
+  } else if (typeof filePath === 'string') {
+    return isRootSegment(filePath);
+  }
+  return false;
+}
+
 function findMatchingDirectories(nodeArray, _filePath) {
   var matches = [];
   nodeArray.forEach(function (node) {
     var _path = _filePath.slice();
     var _node = node.slice();
+    // console.log('comparing', _path, 'with', _node);
     while (_path.length) {
       if (_path.pop() !== _node.pop()) return;
     }

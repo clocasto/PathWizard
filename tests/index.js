@@ -234,19 +234,37 @@ describe('PathWizard', function() {
 
       describe('From A Root Directory', function() {
 
-        it(`Finds './index.js' from various search expressions`, function() {
+        it(`Finds './index.js' from various string search expressions`, function() {
           expect(pw.abs('index.js')).to.eql(_root_indexjs);
           expect(pw.abs('index')).to.eql(_root_indexjs);
           expect(pw.abs('/')).to.eql(_root_indexjs);
+          expect(pw.abs('./')).to.eql(_root_indexjs);
           expect(pw.abs('./index')).to.eql(_root_indexjs);
           expect(pw.abs('./index.js')).to.eql(_root_indexjs);
         })
 
-        it(`Finds './app.js' from various search expressions`, function() {
+        it(`Finds './index.js' from various array search expressions`, function() {
+          expect(pw.abs(['index.js'])).to.eql(_root_indexjs);
+          expect(pw.abs(['index'])).to.eql(_root_indexjs);
+          expect(pw.abs(['/'])).to.eql(_root_indexjs);
+          expect(pw.abs(['./'])).to.eql(_root_indexjs);
+          expect(pw.abs(['./', 'index'])).to.eql(_root_indexjs);
+          expect(pw.abs(['./', 'index.js'])).to.eql(_root_indexjs);
+        })
+
+        it(`Finds './app.js' from various string search expressions`, function() {
           expect(pw.abs('app.js')).to.eql(_root_appjs);
           expect(pw.abs('app')).to.eql(_root_appjs);
           expect(pw.abs('./app')).to.eql(_root_appjs);
           expect(pw.abs('./app.js')).to.eql(_root_appjs);
+        })
+
+        it(`Finds './app.js' from various string search expressions`, function() {
+          expect(pw.abs(['app.js'])).to.eql(_root_appjs);
+          expect(pw.abs(['app'])).to.eql(_root_appjs);
+          expect(pw.abs(['./', 'app'])).to.eql(_root_appjs);
+          expect(pw.abs(['./', 'app.js'])).to.eql(_root_appjs);
+          expect(pw.abs.bind(null, ['./', 'app', '.js'])).to.throw;
         })
 
       })
@@ -295,7 +313,7 @@ describe('PathWizard', function() {
           fse.removeSync(_root_b_b_indexjs);
         })
 
-        it(`Finds './c/c/index.js' from various search expressions`, function() {
+        it(`Finds './c/c/index.js' from various string search expressions`, function() {
 
           fse.removeSync(_root_indexjs);
           fse.removeSync(_root_c_c_cjs);
@@ -316,6 +334,27 @@ describe('PathWizard', function() {
           expect(pw.abs('./c/c/index.js')).to.eql(_root_c_c_indexjs);
         })
 
+        it(`Finds './c/c/index.js' from various array search expressions`, function() {
+
+          fse.removeSync(_root_indexjs);
+          fse.removeSync(_root_c_c_cjs);
+
+          fse.writeFileSync(_root_c_c_indexjs, `${_root_c_c_indexjs}`)
+
+          expect(pw.abs(['index.js'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['index'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['/'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['index.js'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['c', 'index'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['c', 'index.js'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['c', 'c'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['c', 'c', 'index'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['c', 'c', 'index.js'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['/', 'c', 'c'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['.', 'c', 'c', 'index'])).to.eql(_root_c_c_indexjs);
+          expect(pw.abs(['./', 'c', 'c', 'index.js'])).to.eql(_root_c_c_indexjs);
+        })
+
       })
 
     })
@@ -323,9 +362,20 @@ describe('PathWizard', function() {
     describe('Folder matching', function() {
 
       it(`Finds './test-folder/a' from various search expressions`, function() {
+        fse.removeSync(_root_a_ajs);
+        fse.writeFileSync(_root_a_ajs, `'${_root_a_ajs}'`);
+
         expect(pw.absDir('./a')).to.eql(_root_a);
+        expect(pw.absDir('./a/')).to.eql(_root_a);
+        expect(pw.absDir('/a/')).to.eql(_root_a);
         expect(pw.absDir('a/a')).to.eql(_root_a_a);
+        expect(pw.absDir('a/a/')).to.eql(_root_a_a);
+        expect(pw.absDir('./a/a')).to.eql(_root_a_a);
+        expect(pw.absDir('./a/a/')).to.eql(_root_a_a);
         expect(pw.absDir.bind(null, 'a')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
+        expect(pw.absDir.bind(null, 'a/')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
+
+        fse.removeSync(_root_a_ajs);
       })
 
       it(`Finds the root directory from various search expressions`, function() {
@@ -368,13 +418,36 @@ describe('PathWizard', function() {
 
     describe('Folder matching', function() {
 
-      it(`Finds './test-folder/a' from various search expressions`, function() {
+      it(`Finds './test-folder/a' and './test-folder/a/a' from various string search expressions`, function() {
         fse.removeSync(_root_a_ajs);
         fse.writeFileSync(_root_a_ajs, `'${_root_a_ajs}'`);
 
         expect(pw.relDir('./a')).to.eql('./a');
+        expect(pw.relDir('./a/')).to.eql('./a');
+        expect(pw.relDir('/a/')).to.eql('./a');
         expect(pw.relDir('a/a')).to.eql('./a/a');
-        expect(pw.relDir.bind(this, 'a')).to.throw;
+        expect(pw.relDir('a/a/')).to.eql('./a/a');
+        expect(pw.relDir('./a/a')).to.eql('./a/a');
+        expect(pw.relDir('./a/a/')).to.eql('./a/a');
+        expect(pw.relDir.bind(null, 'a')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
+        expect(pw.relDir.bind(null, 'a/')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
+
+        fse.removeSync(_root_a_ajs);
+      })
+
+      xit(`Finds './test-folder/a' and './test-folder/a/a' from various array search expressions`, function() {
+        fse.removeSync(_root_a_ajs);
+        fse.writeFileSync(_root_a_ajs, `'${_root_a_ajs}'`);
+
+        // expect(pw.relDir('./a')).to.eql('./a');
+        // expect(pw.relDir('./a/')).to.eql('./a');
+        // expect(pw.relDir('/a/')).to.eql('./a');
+        // expect(pw.relDir('a/a')).to.eql('./a/a');
+        // expect(pw.relDir('a/a/')).to.eql('./a/a');
+        // expect(pw.relDir('./a/a')).to.eql('./a/a');
+        // expect(pw.relDir('./a/a/')).to.eql('./a/a');
+        // expect(pw.relDir.bind(null, 'a')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
+        // expect(pw.relDir.bind(null, 'a/')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
 
         fse.removeSync(_root_a_ajs);
       })
