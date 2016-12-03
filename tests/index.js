@@ -328,6 +328,12 @@ describe('PathWizard', function() {
         expect(pw.absDir.bind(null, 'a')).to.throw(`The path did not uniquely resolve! \n\n~/a/a\n~/a\n`);
       })
 
+      it(`Finds the root directory from various search expressions`, function() {
+        expect(pw.absDir('./')).to.eql(_root);
+        expect(pw.absDir('/')).to.eql(_root);
+        expect(pw.absDir('.')).to.eql(_root);
+      })
+
     })
 
   })
@@ -342,8 +348,7 @@ describe('PathWizard', function() {
       it('Throws an error when an invalid argument is provided', function() {
         expect(pw.rel.bind(null, '')).to.throw(Error);
         expect(pw.rel.bind(null)).to.throw(Error);
-        expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to
-          .throw;
+        expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to.throw;
         expect(pw.rel.bind(null, '[`${_root_indexjs}`]')).to.throw;
       })
 
@@ -372,6 +377,12 @@ describe('PathWizard', function() {
         expect(pw.relDir.bind(this, 'a')).to.throw;
 
         fse.removeSync(_root_a_ajs);
+      })
+
+      it(`Finds the root directory from various search expressions`, function() {
+        expect(pw.relDir('./')).to.eql('./');
+        expect(pw.relDir('/')).to.eql('./');
+        expect(pw.relDir('.')).to.eql('./');
       })
 
     })

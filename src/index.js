@@ -61,7 +61,7 @@ PathWizard.prototype.absDir = function(filePath) {
   checkSearchTerm(filePath, 'absDir');
 
   let _filePath, matches;
-  if (filePath === '/') {
+  if (filePath === '/' || filePath === './' || filePath === '.') {
     return path.normalize(this.root);
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);

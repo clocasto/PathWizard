@@ -78,7 +78,7 @@ PathWizard.prototype.absDir = function (filePath) {
 
   var _filePath = void 0,
       matches = void 0;
-  if (filePath === '/') {
+  if (filePath === '/' || filePath === './' || filePath === '.') {
     return path.normalize(this.root);
   } else {
     _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
