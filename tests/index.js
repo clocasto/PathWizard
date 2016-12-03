@@ -7,6 +7,8 @@ const expect = chai.expect;
 
 chai.use(spies);
 
+const _require = require;
+
 let _root,
   _root_a,
   _root_b,
@@ -145,6 +147,15 @@ describe('PathWizard', function() {
       expect(nonCachedNodes).to.not.equal(pwNoCache.nodes);
     })
 
+    it('PathWizard Proxy will allow access to origin require properties', function() {
+      expect(_require.main).to.equal(pw.main);
+
+      _require.testProp = 123;
+      _require.testFunc = () => 456;
+      expect(pw.testProp).to.eql(123);
+      expect(pw.testFunc()).to.eql(456);
+    })
+
     describe(`PathWizard Will Ignore & Unignore Certain Directories`, function() {
 
       it(`Using the 'ignore' method`, function() {
@@ -221,11 +232,18 @@ describe('PathWizard', function() {
 
     describe('Handle Invalid Arguments', function() {
 
-      it('Throws an error when an invalid argument is provided', function() {
-        expect(pw.abs.bind(null, require, '')).to.throw;
-        expect(pw.abs.bind(null, require)).to.throw;
-        expect(pw.abs.bind(null, require, '{path: `${_root_indexjs}`}')).to.throw;
-        expect(pw.abs.bind(null, require, '[`${_root_indexjs}`]')).to.throw;
+      it('Throws an error when an invalid argument is provided to `abs`', function() {
+        expect(pw.abs.bind(null, '')).to.throw;
+        expect(pw.abs.bind(null)).to.throw;
+        expect(pw.abs.bind(null, '{path: `${_root_indexjs}`}')).to.throw;
+        expect(pw.abs.bind(null, '[`${_root_indexjs}`]')).to.throw;
+      })
+
+      it('Throws an error when an invalid argument is provided to `absDir`', function() {
+        expect(pw.absDir.bind(null, '')).to.throw(Error);
+        expect(pw.absDir.bind(null)).to.throw(Error);
+        expect(pw.absDir.bind(null, '{path: `${_root_indexjs}`}')).to.throw;
+        expect(pw.absDir.bind(null, '[`${_root_indexjs}`]')).to.throw;
       })
 
     })
@@ -419,11 +437,18 @@ describe('PathWizard', function() {
 
     describe('Invalid Arguments', function() {
 
-      it('Throws an error when an invalid argument is provided', function() {
+      it('Throws an error when an invalid argument is provided to `rel`', function() {
         expect(pw.rel.bind(null, '')).to.throw(Error);
         expect(pw.rel.bind(null)).to.throw(Error);
         expect(pw.rel.bind(null, '{path: `${_root_indexjs}`}')).to.throw;
         expect(pw.rel.bind(null, '[`${_root_indexjs}`]')).to.throw;
+      })
+
+      it('Throws an error when an invalid argument is provided to `relDir`', function() {
+        expect(pw.relDir.bind(null, '')).to.throw(Error);
+        expect(pw.relDir.bind(null)).to.throw(Error);
+        expect(pw.relDir.bind(null, '{path: `${_root_indexjs}`}')).to.throw;
+        expect(pw.relDir.bind(null, '[`${_root_indexjs}`]')).to.throw;
       })
 
     })
