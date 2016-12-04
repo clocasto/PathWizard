@@ -1,11 +1,8 @@
 const chai = require('chai');
-const spies = require('chai-spies');
 const fse = require('fs-extra');
 const path = require('path');
 const PathWizard = require('../dist');
 const expect = chai.expect;
-
-chai.use(spies);
 
 let _root,
   _root_a,
