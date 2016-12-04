@@ -109,6 +109,7 @@ describe('PathWizard', function() {
       expect(pw.rel).to.be.an.instanceof(Function);
       expect(pw.relDir).to.be.an.instanceof(Function);
       expect(pw.ignore).to.be.an.instanceof(Function);
+      expect(pw.unignore).to.be.an.instanceof(Function);
     })
 
     it(`When PathWizard is invoked with no argument, the current root is the process' CWD`, function() {
@@ -152,145 +153,149 @@ describe('PathWizard', function() {
       expect(pw.testFunc()).to.eql(456);
     })
 
-    describe(`PathWizard Will Ignore & Unignore Certain Directories`, function() {
+  })
 
-      it(`Using the 'ignore' method`, function() {
-        expect(pw.ignore).to.be.an.instanceof(Function);
+  describe(`Can Ignore & Unignore Certain Directories`, function() {
+    let pw;
 
-        const ignoredPaths = pw.ignored;
-        const referenceIngoredPaths = ignoredPaths.slice();
-        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+    beforeEach(() => {
+      pw = PathWizard({ cache: false });
+    });
 
-        referenceIngoredPaths.slice().forEach(pw.unignore);
-        expect(ignoredPaths).to.eql([]);
-        referenceIngoredPaths.slice().forEach(pw.unignore);
-        expect(ignoredPaths).to.eql([]);
-      })
+    it(`Using the 'ignore' method`, function() {
+      expect(pw.ignore).to.be.an.instanceof(Function);
 
-      it(`Using the 'unignore' method`, function() {
-        expect(pw.unignore).to.be.an.instanceof(Function);
+      const ignoredPaths = pw.ignored;
+      const referenceIngoredPaths = ignoredPaths.slice();
+      expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
 
-        const ignoredPaths = pw.ignored;
-        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+      referenceIngoredPaths.slice().forEach(pw.unignore);
+      expect(ignoredPaths).to.eql([]);
+      referenceIngoredPaths.slice().forEach(pw.unignore);
+      expect(ignoredPaths).to.eql([]);
+    })
 
-        pw.unignore('node_modules');
+    it(`Using the 'unignore' method`, function() {
+      expect(pw.unignore).to.be.an.instanceof(Function);
 
-        expect(ignoredPaths.includes('node_modules')).to.be.false;
-      })
+      const ignoredPaths = pw.ignored;
+      expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
 
-      it(`Without Error if No Results are Found or if the Ignored State is Empty`, function() {
-        const ignoredPaths = pw.ignored;
-        const referenceIngoredPaths = ignoredPaths.slice();
-        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+      pw.unignore('node_modules');
 
-        referenceIngoredPaths.forEach(pw.unignore);
-        expect(ignoredPaths).to.eql([]);
-        referenceIngoredPaths.forEach(pw.unignore);
-        expect(ignoredPaths).to.eql([]);
-      })
+      expect(ignoredPaths.includes('node_modules')).to.be.false;
+    })
 
-      it(`Won't add duplicates to its ignored list`, function() {
-        const ignoredPaths = pw.ignored;
-        const referenceIngoredPaths = ignoredPaths.slice();
-        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+    it(`Without Error if No Results are Found or if the Ignored State is Empty`, function() {
+      const ignoredPaths = pw.ignored;
+      const referenceIngoredPaths = ignoredPaths.slice();
+      expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
 
-        referenceIngoredPaths.forEach(pw.ignore);
-        expect(ignoredPaths).to.eql(referenceIngoredPaths);
-        referenceIngoredPaths.forEach(pw.ignore);
-        expect(ignoredPaths).to.eql(referenceIngoredPaths);
-        referenceIngoredPaths.forEach(pw.ignore);
-        expect(ignoredPaths).to.eql(referenceIngoredPaths);
-      })
+      referenceIngoredPaths.forEach(pw.unignore);
+      expect(ignoredPaths).to.eql([]);
+      referenceIngoredPaths.forEach(pw.unignore);
+      expect(ignoredPaths).to.eql([]);
+    })
 
-      it(`Using the 'ignore' option in the PathWizard constructor`, function() {
-        pw = PathWizard({ cache: false, ignored: [] });
-        expect(pw.ignored).to.eql([]);
+    it(`Won't add duplicates to its ignored list`, function() {
+      const ignoredPaths = pw.ignored;
+      const referenceIngoredPaths = ignoredPaths.slice();
+      expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
 
-        pw.ignore('node_modules');
-        expect(pw.ignored).to.eql(['node_modules']);
-        pw.unignore('node_modules');
-        expect(pw.ignored).to.eql([]);
-      })
+      referenceIngoredPaths.forEach(pw.ignore);
+      expect(ignoredPaths).to.eql(referenceIngoredPaths);
+      referenceIngoredPaths.forEach(pw.ignore);
+      expect(ignoredPaths).to.eql(referenceIngoredPaths);
+      referenceIngoredPaths.forEach(pw.ignore);
+      expect(ignoredPaths).to.eql(referenceIngoredPaths);
+    })
 
-      it(`from arrays of ignore terms`, function() {
-        pw = PathWizard({ cache: false, ignored: [] });
+    it(`Using the 'ignore' option in the PathWizard constructor`, function() {
+      pw = PathWizard({ cache: false, ignored: [] });
+      expect(pw.ignored).to.eql([]);
 
-        pw.ignore(['node_modules']);
-        expect(pw.ignored).to.eql(['node_modules']);
+      pw.ignore('node_modules');
+      expect(pw.ignored).to.eql(['node_modules']);
+      pw.unignore('node_modules');
+      expect(pw.ignored).to.eql([]);
+    })
 
-        pw.unignore(['node_modules']);
-        expect(pw.ignored).to.eql([]);
+    it(`from arrays of ignore terms`, function() {
+      pw = PathWizard({ cache: false, ignored: [] });
 
-        pw.ignore(['a', 'b', 'c', 'node_modules']);
-        expect(pw.ignored).to.eql(['a', 'b', 'c', 'node_modules']);
+      pw.ignore(['node_modules']);
+      expect(pw.ignored).to.eql(['node_modules']);
 
-        pw.unignore(['a']);
-        expect(pw.ignored).to.eql(['b', 'c', 'node_modules']);
+      pw.unignore(['node_modules']);
+      expect(pw.ignored).to.eql([]);
 
-        pw.unignore(['a']);
-        expect(pw.ignored).to.eql(['b', 'c', 'node_modules']);
+      pw.ignore(['a', 'b', 'c', 'node_modules']);
+      expect(pw.ignored).to.eql(['a', 'b', 'c', 'node_modules']);
 
-        pw.unignore(['a', 'b', 'c']);
-        expect(pw.ignored).to.eql(['node_modules']);
-      })
+      pw.unignore(['a']);
+      expect(pw.ignored).to.eql(['b', 'c', 'node_modules']);
 
-      it(`won't search in ignored directories`, function() {
-        pw = PathWizard({ cache: false });
+      pw.unignore(['a']);
+      expect(pw.ignored).to.eql(['b', 'c', 'node_modules']);
 
-        pw.ignore(['a', 'b', 'c']);
-        expect(pw.ignored).to.eql(['node_modules', 'bower_components', 'a', 'b', 'c']);
-        expect(pw.bind(null, 'test.js')).to.throw;
-        pw.unignore(['a']);
-        expect(pw('test.js')).to.eql(_root_a_testjs);
-      })
+      pw.unignore(['a', 'b', 'c']);
+      expect(pw.ignored).to.eql(['node_modules']);
+    })
 
-      it(`and can handle incorrect search term types`, function() {
-        pw = PathWizard({ cache: false, ignored: [] });
+    it(`won't search in ignored directories`, function() {
+      pw = PathWizard({ cache: false });
 
-        pw.ignore('');
-        pw.ignore(['']);
-        pw.ignore(['', 'a']);
+      pw.ignore(['a', 'b', 'c']);
+      expect(pw.ignored).to.eql(['node_modules', 'bower_components', 'a', 'b', 'c']);
+      expect(pw.bind(null, 'test.js')).to.throw;
+      pw.unignore(['a']);
+      expect(pw('test.js')).to.eql(_root_a_testjs);
+    })
 
-        expect(pw.ignored).to.eql(['a']);
+    it(`and can handle incorrect search term types`, function() {
+      pw = PathWizard({ cache: false, ignored: [] });
 
-        pw.unignore('');
-        pw.unignore(['']);
-        expect(pw.ignored).to.eql(['a']);
+      pw.ignore('');
+      pw.ignore(['']);
+      pw.ignore(['', 'a']);
 
-        pw.unignore(['', 'a']);
-        expect(pw.ignored).to.eql([]);
+      expect(pw.ignored).to.eql(['a']);
 
-        expect(pw.ignore.bind(null, [123]))
-          .to.throw('Ignored files and directories must be strings.\n');
-        expect(pw.ignore.bind(null, 123))
-          .to.throw('Invalid argument type provided to \'ignore\' method. Ignore expressions must be a string or an array of strings!');
-        expect(pw.ignore.bind(null, [{ term: 123 }]))
-          .to.throw('Ignored files and directories must be strings.\n');
-        expect(pw.ignore.bind(null, [
-            [123, 456],
-            [789], 101112
-          ]))
-          .to.throw('Ignored files and directories must be strings.\n');
+      pw.unignore('');
+      pw.unignore(['']);
+      expect(pw.ignored).to.eql(['a']);
 
-        expect(pw.unignore.bind(null, [123]))
-          .to.throw('Ignored files and directories must be strings.\n');
-        expect(pw.unignore.bind(null, 123))
-          .to.throw(`Invalid argument type provided to 'ignore' method. Ignore expressions must be a string or an array of strings!`);
-        expect(pw.unignore.bind(null, [{ term: 123 }]))
-          .to.throw('Ignored files and directories must be strings.\n');
-        expect(pw.unignore.bind(null, [
-            [123, 456],
-            [789], 101112
-          ]))
-          .to.throw('Ignored files and directories must be strings.\n');
-      })
+      pw.unignore(['', 'a']);
+      expect(pw.ignored).to.eql([]);
 
+      expect(pw.ignore.bind(null, [123]))
+        .to.throw('Ignored files and directories must be strings.\n');
+      expect(pw.ignore.bind(null, 123))
+        .to.throw('Invalid argument type provided to \'ignore\' method. Ignore expressions must be a string or an array of strings!');
+      expect(pw.ignore.bind(null, [{ term: 123 }]))
+        .to.throw('Ignored files and directories must be strings.\n');
+      expect(pw.ignore.bind(null, [
+          [123, 456],
+          [789], 101112
+        ]))
+        .to.throw('Ignored files and directories must be strings.\n');
+
+      expect(pw.unignore.bind(null, [123]))
+        .to.throw('Ignored files and directories must be strings.\n');
+      expect(pw.unignore.bind(null, 123))
+        .to.throw(`Invalid argument type provided to 'ignore' method. Ignore expressions must be a string or an array of strings!`);
+      expect(pw.unignore.bind(null, [{ term: 123 }]))
+        .to.throw('Ignored files and directories must be strings.\n');
+      expect(pw.unignore.bind(null, [
+          [123, 456],
+          [789], 101112
+        ]))
+        .to.throw('Ignored files and directories must be strings.\n');
     })
 
   })
 
   describe('Can, For Absolute Paths,', function() {
-
     const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
 
     describe('Handle Invalid Arguments', function() {
@@ -440,7 +445,7 @@ describe('PathWizard', function() {
 
     })
 
-    describe('Folder matching', function() {
+    describe('Find and Match Folders', function() {
 
       it(`Finds './test-folder/a' from various string search expressions`, function() {
         fse.removeSync(_root_a_ajs);
@@ -493,12 +498,12 @@ describe('PathWizard', function() {
 
   })
 
-  describe('Relative Path', function() {
+  describe('Can, For Relative Paths,', function() {
     const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
 
     const format = pathStr => `./${path.relative(__dirname, pathStr)}`;
 
-    describe('Invalid Arguments', function() {
+    describe('Handle Invalid Arguments', function() {
 
       it('Throws an error when an invalid argument is provided to `rel`', function() {
         expect(pw.rel.bind(null, '')).to.throw(Error);
@@ -516,7 +521,7 @@ describe('PathWizard', function() {
 
     })
 
-    describe('File matching', function() {
+    describe('Find and Match Files', function() {
 
       it(`Returns a path preceded by './' or '../'`, function() {
         fse.writeFileSync(_root_c_c_cjs, `${_root_c_c_cjs}`);
@@ -528,7 +533,7 @@ describe('PathWizard', function() {
 
     })
 
-    describe('Folder matching', function() {
+    describe('Find and Match Folders', function() {
 
       it(`Finds './test-folder/a' and './test-folder/a/a' from various string search expressions`, function() {
         fse.removeSync(_root_a_ajs);
@@ -574,7 +579,7 @@ describe('PathWizard', function() {
 
   })
 
-  describe('Require Functionality', function() {
+  describe('Implements Require Functionality', function() {
 
     it('Throws an error when an invalid argument is provided', function() {
       const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
