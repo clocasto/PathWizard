@@ -1,11 +1,11 @@
-pathwizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch=master)](https://travis-ci.org/clocasto/PathWizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&version=1_0_0)](https://coveralls.io/github/clocasto/PathWizard?branch=master)
+pathwizard [![Build Status](https://travis-ci.org/clocasto/pathwizard.svg?branch=master)](https://travis-ci.org/clocasto/pathwizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/pathwizard/badge.svg?branch=master&version=1_0_0)](https://coveralls.io/github/clocasto/pathwizard?branch=master)
 =========
 
-A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path. Instead of hard-coding string literals for relative module paths when using `require`, just specify the shortest, unique segment of a path, and PathWizard will find the correct full path.
+A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path. Instead of hard-coding string literals for relative module paths when using `require`, just specify the shortest, unique segment of a path, and pathwizard will find the correct full path.
 
-***Note 1***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which PathWizard relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath when determining relative paths.  
+***Note 1***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which pathwizard relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath when determining relative paths.  
 
-***Note 2***: This module does *not* work in the browser. PathWizard currently relies upon node's `fs` to gather a list of all the directories in the project folder, so an error will be produced if the filesystem is inaccessible.  
+***Note 2***: This module does *not* work in the browser. pathwizard currently relies upon node's `fs` to gather a list of all the directories in the project folder, so an error will be produced if the filesystem is inaccessible.  
 
 #### Table of Contents  
   0. [Introduction](#introduction)
@@ -25,9 +25,9 @@ A lightweight wrapper around `require` which finds node modules and files based 
   
 ## <a href="introduction"></a>Introduction
 
-PathWizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, *from anywhere in the project folder* just using the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` would not be a unique path. Instead, the user might specify `'db'` to PathWizard to access the file's path or export.
+PathWizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, *from anywhere in the project folder* just using the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` would not be a unique path. Instead, the user might specify `'db'` to pathwizard to access the file's path or export.
 
-Upon the importing the PathWizard module (PathWizard is a proxy around a module's `module.require` function), PathWizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cached list of all discovered directories.
+Upon the importing the pathwizard module (pathwizard is a proxy around a module's `module.require` function), pathwizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cached list of all discovered directories.
 
 ## <a href="shortest-unique-path"></a>Shortest Unique Path  
 Given the following project folder structure:
@@ -61,11 +61,11 @@ Search String | Output | Status
 ## <a href="installation"></a>Installation
 
   ~~`npm install pathwizard --save`~~  
-  `npm install https://github.com/clocasto/PathWizard.git`
+  `npm install https://github.com/clocasto/pathwizard.git`
 
 ## <a href="usage"></a>Usage
 
-  `require('pathwizard')` invokes a constructor function which returns a new PathWizard function instance (a proxy around the   `module.require` method of the invoking file). The PathWizard module takes one optional options parameter.
+  `require('pathwizard')` invokes a constructor function which returns a new pathwizard function instance (a proxy around the   `module.require` method of the invoking file). The pathwizard module takes one optional options parameter.
 
 **Definition**  
   `const pw = require('pathwizard')(options)`
