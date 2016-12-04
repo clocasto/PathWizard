@@ -58,7 +58,7 @@ Search String | Output | Status
 `'index'` or `'index.js'`  | `throw new Error()`. | Index is not a unique path.  
 `'b'`                    | `'test-folder/b/b.js'`. | Like `require`, `b.js` is prioritized over `b/index.js`.  
 
-## <a href="#installation"></a>Installation
+## <a href="installation"></a>Installation
 
   ~~`npm install pathwizard --save`~~  
   `npm install https://github.com/clocasto/PathWizard.git`
@@ -78,7 +78,7 @@ Search String | Output | Status
 **Module Loading**  
   `pw('chai')` or `pw('server/db')`
 
-## <a href="#api_methods"></a>API and Methods
+## <a href="api_methods"></a>API and Methods
 
 **Invocation**  
 The function returned by `require('pathwizard')` behaves similarly to node.js' `require`. The difference is that it will find files based on the shortest unique path segment in addition to requiring modules by name, absolute path, or relative path.  
@@ -110,7 +110,8 @@ This method removes the provided directory name, or array of directory names, (n
 
 ## <a href="tests"></a>Tests
 
-  npm test
+  `npm test`  
+  `npm run cover:dev` for coverage report  
 
 ## <a href="contributing"></a>Contributing
 
