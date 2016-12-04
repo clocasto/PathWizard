@@ -10,23 +10,22 @@ module.exports = PathWizardModule;
 if (require.cache && __filename) delete require.cache[__filename];
 
 function PathWizardModule() {
-  var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : module.parent.require;
-  var rootPath = arguments[1];
-  var options = arguments[2];
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var func = arguments[1];
 
-  if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  var _PathWizard = new PathWizard(rootPath, options);
-  return _PathWizard.proxy(target);
+  if (options.root && typeof options.root !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
+  var _PathWizard = new PathWizard(options);
+  return _PathWizard.proxy(module.parent.require);
 }
 
 function PathWizard() {
-  var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
-
-  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
       _ref$cache = _ref.cache,
       cache = _ref$cache === undefined ? true : _ref$cache,
       _ref$ignored = _ref.ignored,
-      ignored = _ref$ignored === undefined ? ['node_modules', 'bower_components'] : _ref$ignored;
+      ignored = _ref$ignored === undefined ? ['node_modules', 'bower_components'] : _ref$ignored,
+      _ref$root = _ref.root,
+      rootPath = _ref$root === undefined ? process.cwd() : _ref$root;
 
   this.root = rootPath;
   this.ignored = ignored;
@@ -111,12 +110,12 @@ PathWizard.prototype.unignore = function (expressions) {
   return this;
 };
 
-PathWizard.prototype.proxy = function (target) {
+PathWizard.prototype.proxy = function (providedTarget) {
   var _this = this;
 
-  return new Proxy(target, {
+  return new Proxy(providedTarget, {
     apply: function apply(target, thisArg, argumentList) {
-      return requireModule.apply(undefined, [target, _this.abs.bind(_this)].concat(_toConsumableArray(argumentList)));
+      return requireModule.apply(undefined, [_this.abs.bind(_this)].concat(_toConsumableArray(argumentList)));
     },
     get: function get(target, property) {
       switch (property) {
@@ -256,14 +255,14 @@ function traverse() {
   return nodesArray.map(prependRoot);
 }
 
-function requireModule(target, findingFunction, filePath) {
+function requireModule(findingFunction, filePath) {
   checkSearchTerm(filePath, 'requireModule');
 
   var mod = void 0;
   try {
-    mod = target(filePath);
+    mod = module.parent.require(filePath);
   } catch (e) {
-    mod = target(findingFunction(filePath));
+    mod = module.parent.require(findingFunction(filePath));
   }
   return mod;
 };

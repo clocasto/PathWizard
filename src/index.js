@@ -5,13 +5,13 @@ module.exports = PathWizardModule;
 
 if (require.cache && __filename) delete require.cache[__filename];
 
-function PathWizardModule(target = module.parent.require, rootPath, options) {
-  if (rootPath && typeof rootPath !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
-  const _PathWizard = new PathWizard(rootPath, options);
-  return _PathWizard.proxy(target);
+function PathWizardModule(options = {}, func) {
+  if (options.root && typeof options.root !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
+  const _PathWizard = new PathWizard(options);
+  return _PathWizard.proxy(module.parent.require);
 }
 
-function PathWizard(rootPath = process.cwd(), { cache = true, ignored = ['node_modules', 'bower_components'] } = {}) {
+function PathWizard({ cache = true, ignored = ['node_modules', 'bower_components'], root: rootPath = process.cwd() } = {}) {
   this.root = rootPath;
   this.ignored = ignored;
   this.cache = !!cache;
@@ -94,9 +94,9 @@ PathWizard.prototype.unignore = function(expressions) {
   return this;
 };
 
-PathWizard.prototype.proxy = function(target) {
-  return new Proxy(target, {
-    apply: (target, thisArg, argumentList) => requireModule(target, this.abs.bind(this), ...argumentList),
+PathWizard.prototype.proxy = function(providedTarget) {
+  return new Proxy(providedTarget, {
+    apply: (target, thisArg, argumentList) => requireModule(this.abs.bind(this), ...argumentList),
     get: (target, property) => {
       switch (property) {
         case 'abs':

@@ -7,8 +7,6 @@ const expect = chai.expect;
 
 chai.use(spies);
 
-const _require = require;
-
 let _root,
   _root_a,
   _root_b,
@@ -102,7 +100,7 @@ describe('PathWizard', function() {
     let pw;
 
     beforeEach(() => {
-      pw = PathWizard(require, undefined, { cache: false });
+      pw = PathWizard({ cache: false });
     });
 
     it(`PathWizard should have 'abs', 'absDir', 'rel', 'relDir', 'req', and 'ignore' methods`, function() {
@@ -118,20 +116,20 @@ describe('PathWizard', function() {
     })
 
     it('When PathWizard is invoked with a string-typed path, the current root is adjusted', function() {
-      const pw2 = PathWizard(require, _root_c_c);
+      const pw2 = PathWizard({ root: _root_c_c });
       expect(path.normalize(pw2.root)).to.eql(path.normalize(_root_c_c));
     })
 
     it('When PathWizard is invoked with a non-string typed path, an Error is thrown', function() {
-      expect(PathWizard.bind(null, require, [__dirname, 'test-folder']))
+      expect(PathWizard.bind(null, { root: [__dirname, 'test-folder'] }))
         .to.throw('PathWizard constructor only accepts undefined or a string-typed project directory.');
     })
 
     it('PathWizard caches the file structure by default, with an option to disable', function() {
-      const pwCache = PathWizard(require);
+      const pwCache = PathWizard();
       expect(pwCache.cache).to.eql(true);
 
-      const pwNoCache = PathWizard(require, undefined, { cache: false });
+      const pwNoCache = PathWizard({ cache: false });
       expect(pwNoCache.cache).to.eql(false);
 
       pwCache.abs('b');
@@ -148,10 +146,8 @@ describe('PathWizard', function() {
     })
 
     it('PathWizard Proxy will allow access to origin require properties', function() {
-      expect(_require.main).to.equal(pw.main);
-
-      _require.testProp = 123;
-      _require.testFunc = () => 456;
+      pw.testProp = 123;
+      pw.testFunc = () => 456;
       expect(pw.testProp).to.eql(123);
       expect(pw.testFunc()).to.eql(456);
     })
@@ -207,7 +203,7 @@ describe('PathWizard', function() {
       })
 
       it(`Using the 'ignore' option in the PathWizard constructor`, function() {
-        pw = PathWizard(require, undefined, { cache: false, ignored: [] });
+        pw = PathWizard({ cache: false, ignored: [] });
         expect(pw.ignored).to.eql([]);
 
         pw.ignore('node_modules');
@@ -217,7 +213,7 @@ describe('PathWizard', function() {
       })
 
       it(`from arrays of ignore terms`, function() {
-        pw = PathWizard(require, undefined, { cache: false, ignored: [] });
+        pw = PathWizard({ cache: false, ignored: [] });
 
         pw.ignore(['node_modules']);
         expect(pw.ignored).to.eql(['node_modules']);
@@ -239,7 +235,7 @@ describe('PathWizard', function() {
       })
 
       it(`won't search in ignored directories`, function() {
-        pw = PathWizard(require, undefined, { cache: false });
+        pw = PathWizard({ cache: false });
 
         pw.ignore(['a', 'b', 'c']);
         expect(pw.ignored).to.eql(['node_modules', 'bower_components', 'a', 'b', 'c']);
@@ -249,7 +245,7 @@ describe('PathWizard', function() {
       })
 
       it(`and can handle incorrect search term types`, function() {
-        pw = PathWizard(require, undefined, { cache: false, ignored: [] });
+        pw = PathWizard({ cache: false, ignored: [] });
 
         pw.ignore('');
         pw.ignore(['']);
@@ -295,7 +291,7 @@ describe('PathWizard', function() {
 
   describe('Can, For Absolute Paths,', function() {
 
-    const pw = PathWizard(require, path.join(__dirname, 'test-folder'), { cache: false });
+    const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
 
     describe('Handle Invalid Arguments', function() {
 
@@ -498,7 +494,7 @@ describe('PathWizard', function() {
   })
 
   describe('Relative Path', function() {
-    const pw = PathWizard(require, path.join(__dirname, 'test-folder'), { cache: false });
+    const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
 
     const format = pathStr => `./${path.relative(__dirname, pathStr)}`;
 
@@ -581,7 +577,7 @@ describe('PathWizard', function() {
   describe('Require Functionality', function() {
 
     it('Throws an error when an invalid argument is provided', function() {
-      const pw = PathWizard(require, path.join(__dirname, 'test-folder'), { cache: false });
+      const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
 
       expect(pw.rel.bind(null, '')).to.throw;
       expect(pw.rel.bind(null)).to.throw;
@@ -590,7 +586,7 @@ describe('PathWizard', function() {
     })
 
     it(`Will require an installed module, prior to looking in its own cache`, function() {
-      const pw = PathWizard(require, path.join(__dirname, 'test-folder'), { cache: false });
+      const pw = PathWizard({ cache: false });
 
       _root_chaijs = path.join(_root, 'chai.js');
       fse.writeFileSync(_root_chaijs, `'${_root_chaijs}'`);
@@ -606,7 +602,7 @@ describe('PathWizard', function() {
     })
 
     it('Will require a project file if a named module was not found', function() {
-      const pw = PathWizard(require, path.join(__dirname, 'test-folder'), { cache: false });
+      const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
 
       fse.removeSync(_root_c_c_cjs);
       fse.removeSync(_root_c_c_indexjs);
