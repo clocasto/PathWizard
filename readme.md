@@ -115,7 +115,9 @@ This method removes the provided directory name, or array of directory names, (n
 
 ## <a href="contributing"></a>Contributing
 
-Please use the AirBNB style guide for consistency. Add unit tests for any new or changed functionality. Lint and test your code.
+Implement any changes in the src/ files and use `npm run transpile` to build the dist/ file.  
+  
+Please use the AirBNB style guide for consistency. Add unit tests for any new or changed functionality. Lint and test your code.  
 
 ## Release History
 
