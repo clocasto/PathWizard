@@ -61,7 +61,7 @@ describe('PathWizard', function() {
     fse.writeFileSync(_root_appjs, `${_root_appjs}`)
 
     _root_a_testjs = path.join(_root_a, 'test.js');
-    fse.writeFileSync(_root_a_testjs, `${_root_a_testjs}`)
+    fse.writeFileSync(_root_a_testjs, `module.exports = '${_root_a_testjs}'`)
 
     _root_b_indexjs = path.join(_root_b, 'index.js');
     _root_b_bjs = path.join(_root_b, 'b.js');
@@ -171,6 +171,28 @@ describe('PathWizard', function() {
         expect(ignoredPaths).to.eql([]);
       })
 
+      it(`Using the 'unignore' method`, function() {
+        expect(pw.unignore).to.be.an.instanceof(Function);
+
+        const ignoredPaths = pw.ignored;
+        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+
+        pw.unignore('node_modules');
+
+        expect(ignoredPaths.includes('node_modules')).to.be.false;
+      })
+
+      it(`Without Error if No Results are Found or if the Ignored State is Empty`, function() {
+        const ignoredPaths = pw.ignored;
+        const referenceIngoredPaths = ignoredPaths.slice();
+        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+
+        referenceIngoredPaths.forEach(pw.unignore);
+        expect(ignoredPaths).to.eql([]);
+        referenceIngoredPaths.forEach(pw.unignore);
+        expect(ignoredPaths).to.eql([]);
+      })
+
       it(`Won't add duplicates to its ignored list`, function() {
         const ignoredPaths = pw.ignored;
         const referenceIngoredPaths = ignoredPaths.slice();
@@ -194,35 +216,80 @@ describe('PathWizard', function() {
         expect(pw.ignored).to.eql([]);
       })
 
-    })
+      it(`from arrays of ignore terms`, function() {
+        pw = PathWizard(require, undefined, { cache: false, ignored: [] });
 
-    describe(`PathWizard Will Unignore Certain Directories`, function() {
+        pw.ignore(['node_modules']);
+        expect(pw.ignored).to.eql(['node_modules']);
 
-      it(`Using the 'unignore' method`, function() {
-        expect(pw.unignore).to.be.an.instanceof(Function);
+        pw.unignore(['node_modules']);
+        expect(pw.ignored).to.eql([]);
 
-        const ignoredPaths = pw.ignored;
-        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+        pw.ignore(['a', 'b', 'c', 'node_modules']);
+        expect(pw.ignored).to.eql(['a', 'b', 'c', 'node_modules']);
 
-        pw.unignore('node_modules');
+        pw.unignore(['a']);
+        expect(pw.ignored).to.eql(['b', 'c', 'node_modules']);
 
-        expect(ignoredPaths.includes('node_modules')).to.be.false;
+        pw.unignore(['a']);
+        expect(pw.ignored).to.eql(['b', 'c', 'node_modules']);
+
+        pw.unignore(['a', 'b', 'c']);
+        expect(pw.ignored).to.eql(['node_modules']);
       })
 
-      it(`Without Error if No Results are Found or if the Ignored State is Empty`, function() {
-        const ignoredPaths = pw.ignored;
-        const referenceIngoredPaths = ignoredPaths.slice();
-        expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
+      it(`won't search in ignored directories`, function() {
+        pw = PathWizard(require, undefined, { cache: false });
 
-        referenceIngoredPaths.forEach(pw.unignore);
-        expect(ignoredPaths).to.eql([]);
-        referenceIngoredPaths.forEach(pw.unignore);
-        expect(ignoredPaths).to.eql([]);
+        pw.ignore(['a', 'b', 'c']);
+        expect(pw.ignored).to.eql(['node_modules', 'bower_components', 'a', 'b', 'c']);
+        expect(pw.bind(null, 'test.js')).to.throw;
+        pw.unignore(['a']);
+        expect(pw('test.js')).to.eql(_root_a_testjs);
+      })
+
+      it(`and can handle incorrect search term types`, function() {
+        pw = PathWizard(require, undefined, { cache: false, ignored: [] });
+
+        pw.ignore('');
+        pw.ignore(['']);
+        pw.ignore(['', 'a']);
+
+        expect(pw.ignored).to.eql(['a']);
+
+        pw.unignore('');
+        pw.unignore(['']);
+        expect(pw.ignored).to.eql(['a']);
+
+        pw.unignore(['', 'a']);
+        expect(pw.ignored).to.eql([]);
+
+        expect(pw.ignore.bind(null, [123]))
+          .to.throw('Ignored files and directories must be strings.\n');
+        expect(pw.ignore.bind(null, 123))
+          .to.throw('Invalid argument type provided to \'ignore\' method. Ignore expressions must be a string or an array of strings!');
+        expect(pw.ignore.bind(null, [{ term: 123 }]))
+          .to.throw('Ignored files and directories must be strings.\n');
+        expect(pw.ignore.bind(null, [
+            [123, 456],
+            [789], 101112
+          ]))
+          .to.throw('Ignored files and directories must be strings.\n');
+
+        expect(pw.unignore.bind(null, [123]))
+          .to.throw('Ignored files and directories must be strings.\n');
+        expect(pw.unignore.bind(null, 123))
+          .to.throw(`Invalid argument type provided to 'ignore' method. Ignore expressions must be a string or an array of strings!`);
+        expect(pw.unignore.bind(null, [{ term: 123 }]))
+          .to.throw('Ignored files and directories must be strings.\n');
+        expect(pw.unignore.bind(null, [
+            [123, 456],
+            [789], 101112
+          ]))
+          .to.throw('Ignored files and directories must be strings.\n');
       })
 
     })
-
-    xdescribe(`PathWizard Won't Search in Ignored Directories`);
 
   })
 
