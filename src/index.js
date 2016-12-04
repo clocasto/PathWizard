@@ -3,126 +3,129 @@ const path = require('path');
 
 module.exports = PathWizardModule;
 
+//Prevents PathWizard from being cached in require.cache - enables `rel` method functionality
 if (require.cache && __filename) delete require.cache[__filename];
 
 function PathWizardModule(options = {}, func) {
   if (options.root && typeof options.root !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
   const _PathWizard = new PathWizard(options);
-  return _PathWizard.proxy(module.parent.require);
+  return proxifyPathWizard(_PathWizard);
 }
 
-function PathWizard({ cache = true, ignored = ['node_modules', 'bower_components'], root: rootPath = process.cwd() } = {}) {
-  this.root = rootPath;
-  this.ignored = ignored;
-  this.cache = !!cache;
-  this.nodes = this.cache ? traverse(this.root, this.ignored) : null;
-}
-
-PathWizard.prototype.abs = function(filePath) {
-  let _filePath, _filePathWithIndex, matches;
-  if (isRootPath(filePath)) {
-    _filePath = ['index.js'];
-  } else {
-    _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    formatPathArray(_filePath);
+class PathWizard {
+  constructor({ cache = true, ignored = ['node_modules', 'bower_components'], root: rootPath = process.cwd() } = {}) {
+    this.root = rootPath;
+    this.ignored = ignored;
+    this.cache = !!cache;
+    this.nodes = this.cache ? traverse(this.root, this.ignored) : null;
   }
 
-  if (!this.cache) {
-    this.nodes = traverse(this.root, this.ignored);
-  }
+  /**
+   * Search Method - Finds absolute path to the file matching the search expression argument
+   * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
+   * @return {String}                         [absolute path to the matching module]
+   */
+  abs(filePath) {
+    checkSearchTerm(filePath, 'rel');
 
-  let target = _filePath[_filePath.length - 1];
-  if (target.indexOf('.') < 0) {
-    _filePath.push(`${_filePath.pop()}.js`);
-    _filePathWithIndex = _filePath.slice();
-    _filePathWithIndex.push(_filePathWithIndex.pop()
-      .replace(/\.\w+/, ''), 'index.js');
-  }
-
-  matches = findMatchingDirectories(this.nodes, _filePath);
-  if (!matches.length && _filePathWithIndex)
-    matches = findMatchingDirectories(this.nodes, _filePathWithIndex);
-  if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
-  else err(this.root, filePath, matches);
-}
-
-PathWizard.prototype.rel = function(filePath) {
-  checkSearchTerm(filePath, 'rel');
-
-  const _to = path.normalize(this.abs(filePath));
-  const _from = module.parent.filename;
-  const rel = path.relative(_from, _to).slice(3);
-
-  return /\.\./.test(rel) ? rel : `./${rel}`;
-}
-
-PathWizard.prototype.absDir = function(filePath) {
-  checkSearchTerm(filePath, 'absDir');
-
-  let _filePath, matches;
-  if (isRootPath(filePath)) {
-    return path.normalize(this.root);
-  } else {
-    _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
-    formatPathArray(_filePath);
-  }
-
-  if (!this.cache) {
-    this.nodes = traverse(this.root, this.ignored);
-  }
-
-  matches = findMatchingDirectories(this.nodes, _filePath);
-  if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
-  else err(this.root, filePath, matches);
-};
-
-PathWizard.prototype.relDir = function(filePath) {
-
-  const to = path.normalize(this.absDir(filePath));
-  const rel = path.relative(this.root, to);
-
-  return /\.\./.test(rel) ? rel : `./${rel}`;
-};
-
-PathWizard.prototype.ignore = function(expressions) {
-  ignorePath(expressions, this.ignored);
-  return this;
-};
-
-PathWizard.prototype.unignore = function(expressions) {
-  unignorePath(expressions, this.ignored);
-  return this;
-};
-
-PathWizard.prototype.proxy = function(providedTarget) {
-  return new Proxy(providedTarget, {
-    apply: (target, thisArg, argumentList) => requireModule(this.abs.bind(this), ...argumentList),
-    get: (target, property) => {
-      switch (property) {
-        case 'abs':
-          return this.abs.bind(this);
-        case 'absDir':
-          return this.absDir.bind(this);
-        case 'rel':
-          return this.rel.bind(this);
-        case 'relDir':
-          return this.relDir.bind(this);
-        case 'ignore':
-          return this.ignore.bind(this);
-        case 'unignore':
-          return this.unignore.bind(this);
-        case 'root':
-          return this.root;
-        case 'nodes':
-          return this.nodes;
-        case 'cache':
-          return this.cache;
-        case 'ignored':
-          return this.ignored;
-        default:
-          return target[property];
-      }
+    let _filePath, _filePathWithIndex, matches;
+    if (isRootPath(filePath)) {
+      _filePath = ['index.js'];
+    } else {
+      _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
+      formatPathArray(_filePath);
     }
-  })
+
+    if (!this.cache) {
+      this.nodes = traverse(this.root, this.ignored);
+    }
+
+    let target = _filePath[_filePath.length - 1];
+    if (target.indexOf('.') < 0) {
+      _filePath.push(`${_filePath.pop()}.js`);
+      _filePathWithIndex = _filePath.slice();
+      _filePathWithIndex.push(_filePathWithIndex.pop()
+        .replace(/\.\w+/, ''), 'index.js');
+    }
+
+    matches = findMatchingDirectories(this.nodes, _filePath);
+    if (!matches.length && _filePathWithIndex)
+      matches = findMatchingDirectories(this.nodes, _filePathWithIndex);
+    if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
+    else err(this.root, filePath, matches);
+  }
+
+  /**
+   * Search Method - Finds relative path from invoking file to the file matching the 
+   * search expression argument
+   * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
+   * @return {String}                         [relative path to the matching module]
+   */
+  rel(filePath) {
+    const _to = path.normalize(this.abs(filePath));
+    const _from = module.parent.filename;
+    const rel = path.relative(_from, _to).slice(3);
+
+    return /\.\./.test(rel) ? rel : `./${rel}`;
+  }
+
+  /**
+   * Search Method - Finds absolute path to the folder matching the search expression argument
+   * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
+   * @return {String}                         [absolute path to the matching folder]
+   */
+  absDir(filePath) {
+    checkSearchTerm(filePath, 'absDir');
+
+    let _filePath, matches;
+    if (isRootPath(filePath)) {
+      return path.normalize(this.root);
+    } else {
+      _filePath = Array.isArray(filePath) ? filePath : filePath.split(path.sep);
+      formatPathArray(_filePath);
+    }
+
+    if (!this.cache) {
+      this.nodes = traverse(this.root, this.ignored);
+    }
+
+    matches = findMatchingDirectories(this.nodes, _filePath);
+    if (matches.length === 1) return path.join(this.root, ...matches.pop().slice(1));
+    else err(this.root, filePath, matches);
+  }
+
+  /**
+   * Search Method - Finds relative path from invoking file to the folder matching the 
+   * search expression argument
+   * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
+   * @return {String}                         [relative path to the matching module]
+   */
+  relDir(filePath) {
+    const to = path.normalize(this.absDir(filePath));
+    const rel = path.relative(this.root, to);
+
+    return /\.\./.test(rel) ? rel : `./${rel}`;
+  }
+
+  /**
+   * Helper Method - Expression(s) passed to `ignore` won't be searched through
+   * @param  {String, Array[String]} expressions [directory name(s) to ignore during searching]
+   * @return {Object}                            [this (PathWizard instance)]
+   */
+  ignore(expressions) {
+    ignorePath(expressions, this.ignored);
+    return this;
+  }
+
+  /**
+   * Helper Method - Expression(s) passed to `unignore` will be removed from the ignored 
+   * directory names
+   * @param  {String, Array[String]} expressions [directory name(s) to unignore]
+   * @return {Object}                            [this (PathWizard instance)]
+   */
+  unignore(expressions) {
+    unignorePath(expressions, this.ignored);
+    return this;
+  }
 }
 

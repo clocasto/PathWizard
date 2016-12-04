@@ -10,6 +10,12 @@ function err(rootPath, filePath, matches) {
     throw `The path did not uniquely resolve! ${'\n\n'}${matches.map (match => path.join(...match)).join('\n')}${'\n'}`;
 }
 
+/**
+ * Searches through a list of directories and finds matches with the search expression
+ * @param  {Array[Array[String]]} nodeArray [List of all project directories, broken into arrays segments]
+ * @param  {Array[String]}        _filePath [Search Expression - Array of path segments]
+ * @return {Array[Array[String]]}           [Array of all matching directory paths]
+ */
 function findMatchingDirectories(nodeArray, _filePath) {
   const matches = [];
   nodeArray.forEach(node => {
@@ -37,6 +43,12 @@ function formatTrailingDirectory(pathArray) {
   if (lastElement === '' || lastElement === '/') pathArray.pop();
 }
 
+/**
+ * Takes a path segment (directory name) and adds it to a blacklist of directories
+ * @param  {String, Array[String]} pathSegment [Directory Name(s) (to ignore)]
+ * @param  {Array[String]}         ignored     [List of directory names to ignore when searching]
+ * @return {undefined}                         [Side-effects only (mutates `ignored` argument)]
+ */
 function ignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
     pathSegment.forEach(expression => {
@@ -62,6 +74,11 @@ function isRootPath(filePath) {
   return false;
 }
 
+/**
+ * Determines if a pathSegment is a reference to the root directory
+ * @param  {String}  pathSegment [A directory name (path segment)]
+ * @return {Boolean}             [Determines if the pathSegment string is a reference to the root]
+ */
 function isRootSegment(pathSegment) {
   switch (pathSegment) {
     case '':
@@ -77,11 +94,61 @@ function isRootSegment(pathSegment) {
   };
 }
 
+/**
+ * Prepends the root directory symbol to all directories in the project
+ * @param  {Array[String]} node [A relative filepath split on the system-separator]
+ * @return {Array[String]}      [A project-root-relative path split on the system-separator]
+ */
 function prependRoot(node) {
   if (node[0] !== '~') node.unshift('~');
   return node;
 }
 
+/**
+ * Returns a proxy of the parent module's `module.require` function
+ * @param  {PathWizard (Object)} wizard [PathWizard instance for proxy-ing]
+ * @return {Proxy (Object)}             [A proxy of the invoking module's `module.require`]
+ */
+function proxifyPathWizard(wizard) {
+  return new Proxy(module.parent.require, {
+    apply: (target, thisArg, argumentList) => requireModule(wizard.abs.bind(wizard), ...argumentList),
+    get: (target, property) => {
+      switch (property) {
+        case 'abs':
+          return wizard.abs.bind(wizard);
+        case 'absDir':
+          return wizard.absDir.bind(wizard);
+        case 'rel':
+          return wizard.rel.bind(wizard);
+        case 'relDir':
+          return wizard.relDir.bind(wizard);
+        case 'ignore':
+          return wizard.ignore.bind(wizard);
+        case 'unignore':
+          return wizard.unignore.bind(wizard);
+        case 'root':
+          return wizard.root;
+        case 'nodes':
+          return wizard.nodes;
+        case 'cache':
+          return wizard.cache;
+        case 'ignored':
+          return wizard.ignored;
+        default:
+          return target[property];
+      }
+    }
+  })
+}
+
+/**
+ * Used to traverse the file system and gather a list of directories
+ * @param  {String}               rootPath     [Absolute path to the project's root directory]
+ * @param  {Array[Array[String]]} ignoredArray [Directory names to ignore]
+ * @param  {String}               directory    [Current directory name to process]
+ * @param  {Array[Array[String]]} nodesArray   [Accumulator of directories found during traversal]
+ * @return {Array[Array[String]]}              [Array of directories in the PathWizard's root directory]
+ */
 function traverse(rootPath = process.cwd(), ignoredArray, directory = '', nodesArray = []) {
   const nodes = fs.readdirSync(path.join(rootPath, directory))
     .filter(n => {
@@ -100,6 +167,20 @@ function traverse(rootPath = process.cwd(), ignoredArray, directory = '', nodesA
   return nodesArray.map(prependRoot);
 }
 
+/**
+ * Imports a specified module, first trying an installed module and then project file modules
+ *
+ * Note: Given the following code:
+ * `const pw = require('pathwizard')()`
+ * `const chai = pw('chai');`
+ * `const db = pw('server/db');`
+ * 
+ * This is the function called when `pw` is invoked with a `filePath` search expression
+ * 
+ * @param  {Function}              findingFunction [PathWizard Instance `abs` method]
+ * @param  {String, Array[String]} filePath        [Shortest unique path search expression]
+ * @return {Variable (Module)}                     [Module.exports of matched module]
+ */
 function requireModule(findingFunction, filePath) {
   checkSearchTerm(filePath, 'requireModule');
 
@@ -112,6 +193,12 @@ function requireModule(findingFunction, filePath) {
   return mod;
 };
 
+/**
+ * Takes a path segment (directory name) and removes it from the blacklist of directories
+ * @param  {String, Array[String]} pathSegment [Directory Name(s) (to ignore)]
+ * @param  {Array[String]}         ignored     [List of directory names to ignore when searching]
+ * @return {undefined}                         [Side-effects only (mutates `ignored` argument)]
+ */
 function unignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
     pathSegment.forEach(expression => {
