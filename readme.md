@@ -10,7 +10,8 @@ A lightweight wrapper around `require` which finds node modules and files based 
   1. [Shortest Unique Path](#shortest-unique-path)  
   2. [Installation](#installation)
   3. [Usage](#usage)
-  4. [API (Methods)](#api)  
+  4. [API and Methods](#api_methods)  
+     * Invocation  
      * `abs`  
      * `rel`  
      * `absDir`  
@@ -18,13 +19,13 @@ A lightweight wrapper around `require` which finds node modules and files based 
      * `ignore`  
      * `unignore`  
   5. [Tests](#tests)  
-  6. [Configuring](#configuring)  
+  6. [Contributing](#contributing)  
   
 ## <a href="introduction"></a>Introduction
 
-PathWizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, from just the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` would not be a unique path. Instead, the user might specify `'db'` to PathWizard, *from anywhere in the project folder*, to access the file's path or export.
+PathWizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, *from anywhere in the project folder* just using the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` would not be a unique path. Instead, the user might specify `'db'` to PathWizard to access the file's path or export.
 
-Upon the first invocation of it (PathWizard is a proxy around a module's `require` function) or one of its searching methods (`abs`, `absDir`, `rel`, `relDir`), PathWizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cache of all discovered directories.
+Upon the importing the PathWizard module (PathWizard is a proxy around a module's `module.require` function), PathWizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cached list of all discovered directories.
 
 ## <a href="shortest-unique-path"></a>Shortest Unique Path  
 Given the following project folder structure:
@@ -62,34 +63,47 @@ Search String | Output | Status
 
 ## <a href="usage"></a>Usage
 
-  `require = require('pathwizard')(require, rootPath, options)`
+  `require('pathwizard')` invokes a constructor function which returns a new PathWizard function instance (a proxy around the   `module.require` method of the invoking file). The PathWizard module takes one optional options parameter.
 
-  `require('pathwizard')` is a constructor function which returns a new PathWizard instance (a proxy around the passed-in `require` function). The constructor takes two additional optional parameters: absolute path to project root folder and options.
+**Definition**  
+  `const pw = require('pathwizard')(options)`
 
-  `var options = {
-  	cache: boolean,
-  	ignored: array of directory names
-  }`
+**Options**  
+  `root [string]`: absolute path of project root directory  
+  `cache [boolean]`: toggle caching of found directories list  
+  `ignored [array[string]]`: list of directory names to ignore during file matching  
+  
+**Module Loading**  
+  `pw('chai')` or `pw('server/db')`
 
-## <a href="api"></a>API (Methods)
+## <a href="api_methods"></a>API and Methods
+
+**Invocation**  
+The function returned by `require('pathwizard')` behaves similarly to node.js' `require`. The difference is that it will find files based on the shortest unique path segment in addition to requiring modules by name, absolute path, or relative path.  
 
 **abs**  
-This method returns the absolute path of a matching **file**. This method does *not* match folders, but can find matching files within arbitrarily-named, nested folders.
+This method returns the absolute path of a matching **file**. This method does *not* match folders, but can find matching files within arbitrarily-named, nested folders.  
+`pw.abs('server/db'); // Returns absolute path to the matching server/db file`  
 
 **rel**  
-This method returns the relative path *from the file invoking 'rel'* to the matching **file**. This method does *not* match folders, but can find matching files within arbitrarily-named, nested folders.
+This method returns the relative path *from the file invoking 'rel'* to the matching **file**. This method does *not* match folders, but can find matching files within arbitrarily-named, nested folders.  
+`pw.rel('server/db'); // Returns relative path from the invoking file to the matching 'db.js' or 'db/index.js' file`  
 
 **absDir**  
-This method returns the absolute path of a matching *folder*. This method does *not* match **files**.
+This method returns the absolute path of a matching *folder*. This method does *not* match **files**.  
+`pw.absDir('server/config'); // Returns absolute path to the matching 'config' folder directory`  
 
 **relDir**  
 This method returns the relative path of a matching *folder*. This method does *not* match **files**.
+`pw.relDir('server/db/schema'); // Returns relative path to the matching 'schema' folder directory` 
 
 **ignore**  
-This method adds the provided directory name, or array of directory names, (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
+This method adds the provided directory name, or array of directory names, (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.  
+`pw.ignore('client'); // Adds the directory name, 'client', to the list of path segments to ignore when traversing the file system` 
 
 **unignore**  
-This method removes the provided directory name, or array of directory names, (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.
+This method removes the provided directory name, or array of directory names, (note: this is *not* a path, but a folder or file name) to the list of directory names which are ignored. `node_modules` and `bower_components` are ignored by default.  
+`pw.unignore('client'); // Removes the directory name, 'client', from the list of ignored path segments`   
 
 ## <a href="tests"></a>Tests
 
