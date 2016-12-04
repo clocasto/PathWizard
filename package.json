@@ -1,15 +1,15 @@
 {
-  "name": "PathWizard",
+  "name": "pathwizard",
   "version": "1.0.0",
   "description": "A lightweight wrapper around `require` which finds modules and files based on the shortest unique path.",
   "main": "dist/index.js",
   "keywords": ["path", "file", "module", "require", "import", "export", "file tree"],
   "author": "@clocasto",
   "license": "MIT",
-  "bugs": "https://github.com/clocasto/PathWizard/issues",
+  "bugs": "https://github.com/clocasto/pathwizard/issues",
   "repository" : { 
     "type" : "git",
-    "url" : "https://github.com/clocasto/PathWizard.git"
+    "url" : "https://github.com/clocasto/pathwizard.git"
   },
   "scripts": {
     "test": "mocha tests/",
