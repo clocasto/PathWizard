@@ -41,16 +41,15 @@ function ignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
     pathSegment.forEach(expression => {
       if (typeof expression !== 'string') throw `Ignored files and directories must be strings.${'\n'}`;
-      if (!isPathIgnored(expression, ignored)) ignored.push(expression);
+      if (!isPathIgnored(expression, ignored) && expression.length) ignored.push(expression);
     })
   } else if (typeof pathSegment === 'string') {
-    if (!isPathIgnored(pathSegment, ignored)) ignored.push(pathSegment);
+    if (!isPathIgnored(pathSegment, ignored) && pathSegment.length) ignored.push(pathSegment);
   } else throw `Invalid argument type provided to 'ignore' method. Ignore expressions must be a string or an array of strings!`;
-  return null;
 }
 
 function isPathIgnored(pathSegment, ignored) {
-  if (pathSegment[0] === '.') return true;
+  if (pathSegment[0] === '.') return true; //The traverse method won't look at hidden directories.
   return ignored.some(element => element === pathSegment);
 }
 
@@ -118,12 +117,11 @@ function unignorePath(pathSegment, ignored) {
     pathSegment.forEach(expression => {
       if (typeof expression !== 'string') throw `Ignored files and directories must be strings.${'\n'}`;
       const pathIndex = ignored.indexOf(expression);
-      if (pathIndex >= 0) ignored.splice(pathIndex, 1);
+      if (pathIndex >= 0 && pathSegment.length > 0) ignored.splice(pathIndex, 1);
     })
   } else if (typeof pathSegment === 'string') {
     const pathIndex = ignored.indexOf(pathSegment);
-    if (pathIndex >= 0) ignored.splice(pathIndex, 1);
-  } else `Invalid argument type provided to 'ignore' method. Ignore expressions must be a string or an array of strings!`;
-  return null;
+    if (pathIndex >= 0 && pathSegment.length > 0) ignored.splice(pathIndex, 1);
+  } else throw `Invalid argument type provided to 'ignore' method. Ignore expressions must be a string or an array of strings!`;
 }
 
