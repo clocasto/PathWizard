@@ -1,9 +1,11 @@
 PathWizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch=master)](https://travis-ci.org/clocasto/PathWizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&version=0_1_3b)](https://coveralls.io/github/clocasto/PathWizard?branch=master)
 =========
 
-A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path. Instead of hard-coding string literals for relative module paths when using `require`, just specify the shortest, unique segment of a path and PathWizard will find the correct full path.
+A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path. Instead of hard-coding string literals for relative module paths when using `require`, just specify the shortest, unique segment of a path, and PathWizard will find the correct full path.
 
-***Note***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which PathWizard relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath.
+***Note 1***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which PathWizard relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath when determining relative paths.  
+
+***Note 2***: This module does *not* work in the browser. PathWizard currently relies upon node's `fs` to gather a list of all the directories in the project folder, so an error will be produced if the filesystem is inaccessible.  
 
 #### Table of Contents  
   0. [Introduction](#introduction)
@@ -76,10 +78,11 @@ Search String | Output | Status
 **Module Loading**  
   `pw('chai')` or `pw('server/db')`
 
-## <a href="api_methods"></a>API and Methods
+## <a href="#api_methods"></a>API and Methods
 
 **Invocation**  
 The function returned by `require('pathwizard')` behaves similarly to node.js' `require`. The difference is that it will find files based on the shortest unique path segment in addition to requiring modules by name, absolute path, or relative path.  
+`pw('server/api'); // Loads the module.exports of the matching 'server/api.js' or 'server/api/index.js' file`  
 
 **abs**  
 This method returns the absolute path of a matching **file**. This method does *not* match folders, but can find matching files within arbitrarily-named, nested folders.  
