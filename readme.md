@@ -1,4 +1,4 @@
-PathWizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch=master)](https://travis-ci.org/clocasto/PathWizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&version=0_1_4)](https://coveralls.io/github/clocasto/PathWizard?branch=master)
+PathWizard [![Build Status](https://travis-ci.org/clocasto/PathWizard.svg?branch=master)](https://travis-ci.org/clocasto/PathWizard) [![Coverage Status](https://coveralls.io/repos/github/clocasto/PathWizard/badge.svg?branch=master&version=1_0_0)](https://coveralls.io/github/clocasto/PathWizard?branch=master)
 =========
 
 A lightweight wrapper around `require` which finds node modules and files based on the shortest unique path. Instead of hard-coding string literals for relative module paths when using `require`, just specify the shortest, unique segment of a path, and PathWizard will find the correct full path.
@@ -121,4 +121,4 @@ Please use the AirBNB style guide for consistency. Add unit tests for any new or
 
 ## Release History
 
-* 0.1.4 Development
+* 1.0.0 Release
