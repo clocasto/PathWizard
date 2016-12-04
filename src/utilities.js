@@ -100,14 +100,14 @@ function traverse(rootPath = process.cwd(), ignoredArray, directory = '', nodesA
   return nodesArray.map(prependRoot);
 }
 
-function requireModule(target, findingFunction, filePath) {
+function requireModule(findingFunction, filePath) {
   checkSearchTerm(filePath, 'requireModule');
 
   let mod;
   try {
-    mod = target(filePath);
+    mod = module.parent.require(filePath);
   } catch (e) {
-    mod = target(findingFunction(filePath));
+    mod = module.parent.require(findingFunction(filePath));
   }
   return mod;
 };
