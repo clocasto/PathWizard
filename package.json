@@ -12,11 +12,11 @@
     "url" : "https://github.com/clocasto/pathwizard.git"
   },
   "scripts": {
-    "test": "mocha tests/",
-    "cover:prod": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- tests",
-    "cover:dev": "istanbul cover ./node_modules/mocha/bin/_mocha -- tests && open coverage/lcov-report/index.html",
+    "test": "./node_modules/mocha/bin/_mocha tests/",
+    "cover:prod": "node node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- tests",
+    "cover:dev": "node node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- tests && open coverage/lcov-report/index.html",
     "test-travis": "npm run transpile && npm run cover:prod",
-    "transpile": "babel src --out-file dist/index.js --presets=es2015"
+    "transpile": "node node_modules/babel-cli/bin/babel.js src --out-file dist/index.js --presets=es2015"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
