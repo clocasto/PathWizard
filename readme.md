@@ -5,7 +5,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
 
 ***Note 1***: This module will **not** cache itself in node's `require.cache`. This is to enable dynamic updating of `module.parent.filename`, which pathwizard relies upon to find the invoking ('[from](https://nodejs.org/api/path.html#path_path_relative_from_to)') filepath when determining relative paths.  
 
-***Note 2***: This module does *not* work in the browser. pathwizard currently relies upon node's `fs` to gather a list of all the directories in the project folder, so an error will be produced if the filesystem is inaccessible.  
+***Note 2***: This module does *not* work in the browser. Pathwizard currently relies upon node's `fs` to gather a list of all the directories in the project folder, so an error will be produced if the filesystem is inaccessible.  
 
 #### Table of Contents  
   0. [Introduction](#introduction)
@@ -25,7 +25,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
   
 ## <a href="introduction"></a>Introduction
 
-PathWizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, *from anywhere in the project folder* just using the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` would not be a unique path. Instead, the user might specify `'db'` to pathwizard to access the file's path or export.
+Pathwizard makes requiring modules and relative/absolute path finding simpler. A user can return a path to or require a file, `'server/db/index.js'`, *from anywhere in the project folder* just using the shortest unique path of (`'index'`). If there were another `index.js` file in the project folder, `'client/index.js'`, an error would be thrown because `'index'` would not be a unique path. Instead, the user might specify `'db'` to pathwizard to access the file's path or export.
 
 Upon the importing the pathwizard module (pathwizard is a proxy around a module's `module.require` function), pathwizard will traverse the specified project root folder (`process.cwd` by default) and maintain a cached list of all discovered directories.
 
@@ -60,8 +60,7 @@ Search String | Output | Status
 
 ## <a href="installation"></a>Installation
 
-  ~~`npm install pathwizard --save`~~  
-  `npm install https://github.com/clocasto/pathwizard.git`
+  `npm install pathwizard --save`
 
 ## <a href="usage"></a>Usage
 
@@ -76,7 +75,7 @@ Search String | Output | Status
   `ignored [array[string]]`: list of directory names to ignore during file matching  
   
 **Module Loading**  
-  `pw('chai')` or `pw('server/db')`
+  `const chai = pw('chai');` or `var db = pw('server/db');`
 
 ## <a href="api_methods"></a>API and Methods
 
