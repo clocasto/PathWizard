@@ -23,6 +23,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
   5. [Tests](#tests)  
   6. [Contributing](#contributing)  
   7. [License](#license)
+  8. [Release History](#release)
   
 ## <a href="introduction"></a>Introduction
 
@@ -123,6 +124,6 @@ Please use the AirBNB style guide for consistency. Add unit tests for any new or
 
 MIT (See license.txt)  
 
-## Release History
+## <a href="release"></a>Release History
 
 * 1.0.0 Release
