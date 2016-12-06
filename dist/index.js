@@ -68,7 +68,7 @@ var PathWizard = function () {
       }
 
       var target = _filePath[_filePath.length - 1];
-      if (target.indexOf('.') < 0) {
+      if (!/\.js$/.test(target)) {
         _filePath.push(_filePath.pop() + '.js');
         _filePathWithIndex = _filePath.slice();
         _filePathWithIndex.push(_filePathWithIndex.pop().replace(/\.\w+/, ''), 'index.js');
