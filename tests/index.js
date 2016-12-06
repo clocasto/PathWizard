@@ -18,6 +18,7 @@ let _root,
   _root_indexjs,
   _root_appjs,
   _root_userrouterjs,
+  _root_testjsrouterjs,
   _root_routes_bookrouterjs,
   _root_a_testjs,
   _root_b_bjs,
@@ -62,6 +63,9 @@ describe('PathWizard', function() {
 
     _root_userrouterjs = path.join(_root, 'user.router.js');
     fse.writeFileSync(_root_userrouterjs, `module.exports = '${_root_userrouterjs}'`);
+
+    _root_testjsrouterjs = path.join(_root, 'test.js.router.js');
+    fse.writeFileSync(_root_testjsrouterjs, `module.exports = '${_root_testjsrouterjs}'`);
 
     _root_a_testjs = path.join(_root_a, 'test.js');
     fse.writeFileSync(_root_a_testjs, `module.exports = '${_root_a_testjs}'`)
@@ -368,12 +372,26 @@ describe('PathWizard', function() {
           expect(pw.abs('./user.router.js')).to.eql(_root_userrouterjs);
         })
 
+        it(`Finds './test.js.router.js' from various string search expressions`, function() {
+          expect(pw.abs('test.js.router.js')).to.eql(_root_testjsrouterjs);
+          expect(pw.abs('test.js.router')).to.eql(_root_testjsrouterjs);
+          expect(pw.abs('./test.js.router')).to.eql(_root_testjsrouterjs);
+          expect(pw.abs('./test.js.router.js')).to.eql(_root_testjsrouterjs);
+        })
+
         it(`Finds './user.router.js' from various array search expressions`, function() {
           expect(pw.abs(['user.router.js'])).to.eql(_root_userrouterjs);
           expect(pw.abs(['user.router'])).to.eql(_root_userrouterjs);
           expect(pw.abs(['./', 'user.router'])).to.eql(_root_userrouterjs);
           expect(pw.abs(['./', 'user.router.js'])).to.eql(_root_userrouterjs);
           expect(pw.abs.bind(null, ['./', 'user.router', '.js'])).to.throw;
+        })
+
+        it(`Finds './test.js.router.js' from various array search expressions`, function() {
+          expect(pw.abs(['test.js.router.js'])).to.eql(_root_testjsrouterjs);
+          expect(pw.abs(['test.js.router'])).to.eql(_root_testjsrouterjs);
+          expect(pw.abs(['./', 'test.js.router'])).to.eql(_root_testjsrouterjs);
+          expect(pw.abs(['./', 'test.js.router.js'])).to.eql(_root_testjsrouterjs);
         })
 
       })
