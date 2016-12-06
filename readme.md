@@ -12,7 +12,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
   1. [Shortest Unique Path](#shortest-unique-path)  
   2. [Installation](#installation)
   3. [Usage](#usage)
-  4. [API and Methods](#api_methods)  
+  4. [API and Methods](#api)  
      * Invocation  
      * `abs`  
      * `rel`  
@@ -22,6 +22,8 @@ A lightweight wrapper around `require` which finds node modules and files based 
      * `unignore`  
   5. [Tests](#tests)  
   6. [Contributing](#contributing)  
+  7. [License](#license)
+  8. [Release History](#release)
   
 ## <a href="introduction"></a>Introduction
 
@@ -77,7 +79,7 @@ Search String | Output | Status
 **Module Loading**  
   `const chai = pw('chai');` or `var db = pw('server/db');`
 
-## <a href="api_methods"></a>API and Methods
+## <a href="api"></a>API and Methods
 
 **Invocation**  
 The function returned by `require('pathwizard')` behaves similarly to node.js' `require`. The difference is that it will find files based on the shortest unique path segment in addition to requiring modules by name, absolute path, or relative path.  
@@ -118,6 +120,10 @@ Implement any changes in the src/ files and use `npm run transpile` to build the
   
 Please use the AirBNB style guide for consistency. Add unit tests for any new or changed functionality. Lint and test your code.  
 
-## Release History
+## <a href="license"></a>License  
 
-* 1.0.0 Release
+MIT (See license.txt)  
+
+## <a href="release"></a>Release History
+
+* 1.0.1 Release

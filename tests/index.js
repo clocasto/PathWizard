@@ -8,6 +8,7 @@ let _root,
   _root_a,
   _root_b,
   _root_c,
+  _root_routes,
   _root_chaijs,
   _root_sinonjs,
   _root_a_a,
@@ -16,6 +17,9 @@ let _root,
   _root_a_ajs,
   _root_indexjs,
   _root_appjs,
+  _root_userrouterjs,
+  _root_testjsrouterjs,
+  _root_routes_bookrouterjs,
   _root_a_testjs,
   _root_b_bjs,
   _root_b_indexjs,
@@ -36,6 +40,8 @@ describe('PathWizard', function() {
     fse.mkdirSync(_root_b);
     _root_c = path.join(_root, 'c');
     fse.mkdirSync(_root_c);
+    _root_routes = path.join(_root, 'routes');
+    fse.mkdirSync(_root_routes);
 
     _root_chaijs = path.join(_root, 'chai.js');
     _root_sinonjs = path.join(_root, 'sinon.js');
@@ -55,12 +61,21 @@ describe('PathWizard', function() {
     _root_appjs = path.join(_root, 'app.js');
     fse.writeFileSync(_root_appjs, `${_root_appjs}`)
 
+    _root_userrouterjs = path.join(_root, 'user.router.js');
+    fse.writeFileSync(_root_userrouterjs, `module.exports = '${_root_userrouterjs}'`);
+
+    _root_testjsrouterjs = path.join(_root, 'test.js.router.js');
+    fse.writeFileSync(_root_testjsrouterjs, `module.exports = '${_root_testjsrouterjs}'`);
+
     _root_a_testjs = path.join(_root_a, 'test.js');
     fse.writeFileSync(_root_a_testjs, `module.exports = '${_root_a_testjs}'`)
 
     _root_b_indexjs = path.join(_root_b, 'index.js');
     _root_b_bjs = path.join(_root_b, 'b.js');
-    fse.writeFileSync(_root_b_bjs, `${_root_b_bjs}`)
+    fse.writeFileSync(_root_b_bjs, `${_root_b_bjs}`);
+
+    _root_routes_bookrouterjs = path.join(_root_routes, 'book.router.js');
+    fse.writeFileSync(_root_routes_bookrouterjs, `module.exports = '${_root_routes_bookrouterjs}'`);
 
     _root_c_c_indexjs = path.join(_root_c_c, 'index.js');
 
@@ -342,12 +357,41 @@ describe('PathWizard', function() {
           expect(pw.abs('./app.js')).to.eql(_root_appjs);
         })
 
-        it(`Finds './app.js' from various string search expressions`, function() {
+        it(`Finds './app.js' from various array search expressions`, function() {
           expect(pw.abs(['app.js'])).to.eql(_root_appjs);
           expect(pw.abs(['app'])).to.eql(_root_appjs);
           expect(pw.abs(['./', 'app'])).to.eql(_root_appjs);
           expect(pw.abs(['./', 'app.js'])).to.eql(_root_appjs);
           expect(pw.abs.bind(null, ['./', 'app', '.js'])).to.throw;
+        })
+
+        it(`Finds './user.router.js' from various string search expressions`, function() {
+          expect(pw.abs('user.router.js')).to.eql(_root_userrouterjs);
+          expect(pw.abs('user.router')).to.eql(_root_userrouterjs);
+          expect(pw.abs('./user.router')).to.eql(_root_userrouterjs);
+          expect(pw.abs('./user.router.js')).to.eql(_root_userrouterjs);
+        })
+
+        it(`Finds './test.js.router.js' from various string search expressions`, function() {
+          expect(pw.abs('test.js.router.js')).to.eql(_root_testjsrouterjs);
+          expect(pw.abs('test.js.router')).to.eql(_root_testjsrouterjs);
+          expect(pw.abs('./test.js.router')).to.eql(_root_testjsrouterjs);
+          expect(pw.abs('./test.js.router.js')).to.eql(_root_testjsrouterjs);
+        })
+
+        it(`Finds './user.router.js' from various array search expressions`, function() {
+          expect(pw.abs(['user.router.js'])).to.eql(_root_userrouterjs);
+          expect(pw.abs(['user.router'])).to.eql(_root_userrouterjs);
+          expect(pw.abs(['./', 'user.router'])).to.eql(_root_userrouterjs);
+          expect(pw.abs(['./', 'user.router.js'])).to.eql(_root_userrouterjs);
+          expect(pw.abs.bind(null, ['./', 'user.router', '.js'])).to.throw;
+        })
+
+        it(`Finds './test.js.router.js' from various array search expressions`, function() {
+          expect(pw.abs(['test.js.router.js'])).to.eql(_root_testjsrouterjs);
+          expect(pw.abs(['test.js.router'])).to.eql(_root_testjsrouterjs);
+          expect(pw.abs(['./', 'test.js.router'])).to.eql(_root_testjsrouterjs);
+          expect(pw.abs(['./', 'test.js.router.js'])).to.eql(_root_testjsrouterjs);
         })
 
       })
@@ -381,6 +425,21 @@ describe('PathWizard', function() {
           expect(pw.abs('c/c/c.js')).to.eql(_root_c_c_cjs);
           expect(pw.abs('./c/c/c.js')).to.eql(_root_c_c_cjs);
           expect(pw.abs('./c/c/c')).to.eql(_root_c_c_cjs);
+        })
+
+        it(`Finds './routes/book.router.js' from various string search expressions`, function() {
+          expect(pw.abs('book.router.js')).to.eql(_root_routes_bookrouterjs);
+          expect(pw.abs('book.router')).to.eql(_root_routes_bookrouterjs);
+          expect(pw.abs('./routes/book.router')).to.eql(_root_routes_bookrouterjs);
+          expect(pw.abs('routes/book.router.js')).to.eql(_root_routes_bookrouterjs);
+        })
+
+        it(`Finds './routes/book.router.js' from various array search expressions`, function() {
+          expect(pw.abs(['book.router.js'])).to.eql(_root_routes_bookrouterjs);
+          expect(pw.abs(['book.router'])).to.eql(_root_routes_bookrouterjs);
+          expect(pw.abs(['./', 'routes', 'book.router'])).to.eql(_root_routes_bookrouterjs);
+          expect(pw.abs(['routes', 'book.router.js'])).to.eql(_root_routes_bookrouterjs);
+          expect(pw.abs.bind(null, ['./', 'book.router', '.js'])).to.throw;
         })
 
         it(`Chooses '{{directory}}.js' over '{{directory}}/index.js'`, function() {
@@ -526,6 +585,21 @@ describe('PathWizard', function() {
         expect(require('./test-folder/c/c/d.js')).to.eql('./c.js');
         expect(require('./test-folder/c/c/f.js')).to.eql('../../b/b.js');
         expect(require('./test-folder/c/c/f.js')).to.eql('../../b/b.js');
+      })
+
+      it(`Finds './user.router.js' from various string search expressions`, function() {
+        expect(pw.rel('user.router.js')).to.eql(format(_root_userrouterjs));
+        expect(pw.rel('user.router')).to.eql(format(_root_userrouterjs));
+        expect(pw.rel('./user.router')).to.eql(format(_root_userrouterjs));
+        expect(pw.rel('./user.router.js')).to.eql(format(_root_userrouterjs));
+      })
+
+      it(`Finds './user.router.js' from various array search expressions`, function() {
+        expect(pw.rel(['user.router.js'])).to.eql(format(_root_userrouterjs));
+        expect(pw.rel(['user.router'])).to.eql(format(_root_userrouterjs));
+        expect(pw.rel(['./', 'user.router'])).to.eql(format(_root_userrouterjs));
+        expect(pw.rel(['./', 'user.router.js'])).to.eql(format(_root_userrouterjs));
+        expect(pw.rel.bind(null, ['./', 'user.router', '.js'])).to.throw;
       })
 
     })
