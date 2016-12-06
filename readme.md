@@ -126,4 +126,4 @@ MIT (See license.txt)
 
 ## <a href="release"></a>Release History
 
-* 1.0.0 Release
+* 1.0.1 Release
