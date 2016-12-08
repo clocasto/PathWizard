@@ -12,7 +12,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
   1. [Shortest Unique Path](#shortest-unique-path)  
   2. [Installation](#installation)
   3. [Usage](#usage)
-  4. [API and Methods](#apimethods)  
+  4. [API and Methods](#api-and-methods)  
      * Invocation  
      * `abs`  
      * `rel`  
@@ -23,7 +23,7 @@ A lightweight wrapper around `require` which finds node modules and files based 
   5. [Tests](#tests)  
   6. [Contributing](#contributing)  
   7. [License](#license)
-  8. [Release History](#release)
+  8. [Release History](#release-history)
   
 ## <a href="introduction"></a>Introduction
 
@@ -79,7 +79,7 @@ Search String | Output | Status
 **Module Loading**  
   `const chai = pw('chai');` or `var db = pw('server/db');`
 
-## <a href="apimethods"></a>API and Methods
+## API and Methods
 
 #### Invocation(filePathExpression)  
 The function returned by `require('pathwizard')` behaves similarly to node.js' `require`. The difference is that it will find files based on the shortest unique path segment in addition to requiring modules by name, absolute path, or relative path.  
@@ -156,7 +156,7 @@ Please use the AirBNB style guide for consistency. Add unit tests for any new or
 
 MIT (See license.txt)  
 
-## <a href="release"></a>Release History
+## <a href="release-history"></a>Release History
 
 * 1.0.2
 * [1.0.1](https://github.com/clocasto/pathwizard/pull/13)
