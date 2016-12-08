@@ -44,7 +44,7 @@ var PathWizard = function () {
   /**
    * Search Method - Finds absolute path to the file matching the search expression argument
    * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-   * @return {String}                         [absolute path to the matching module]
+   * @returns {String}                         [absolute path to the matching module]
    */
 
 
@@ -83,7 +83,7 @@ var PathWizard = function () {
      * Search Method - Finds relative path from invoking file to the file matching the 
      * search expression argument
      * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-     * @return {String}                         [relative path to the matching module]
+     * @returns {String}                         [relative path to the matching module]
      */
 
   }, {
@@ -100,7 +100,7 @@ var PathWizard = function () {
     /**
      * Search Method - Finds absolute path to the folder matching the search expression argument
      * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-     * @return {String}                         [absolute path to the matching folder]
+     * @returns {String}                         [absolute path to the matching folder]
      */
 
   }, {
@@ -129,7 +129,7 @@ var PathWizard = function () {
      * Search Method - Finds relative path from invoking file to the folder matching the 
      * search expression argument
      * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-     * @return {String}                         [relative path to the matching module]
+     * @returns {String}                         [relative path to the matching module]
      */
 
   }, {
@@ -145,7 +145,7 @@ var PathWizard = function () {
     /**
      * Helper Method - Expression(s) passed to `ignore` won't be searched through
      * @param  {String, Array[String]} expressions [directory name(s) to ignore during searching]
-     * @return {Object}                            [this (PathWizard instance)]
+     * @returns {Object}                            [proxified PathWizard instance]
      */
 
   }, {
@@ -159,7 +159,7 @@ var PathWizard = function () {
      * Helper Method - Expression(s) passed to `unignore` will be removed from the ignored 
      * directory names
      * @param  {String, Array[String]} expressions [directory name(s) to unignore]
-     * @return {Object}                            [this (PathWizard instance)]
+     * @returns {Object}                            [proxified PathWizard instance]
      */
 
   }, {
@@ -193,7 +193,7 @@ function err(rootPath, filePath, matches) {
  * Searches through a list of directories and finds matches with the search expression
  * @param  {Array[Array[String]]} nodeArray [List of all project directories, broken into arrays segments]
  * @param  {Array[String]}        _filePath [Search Expression - Array of path segments]
- * @return {Array[Array[String]]}           [Array of all matching directory paths]
+ * @returns {Array[Array[String]]}           [Array of all matching directory paths]
  */
 function findMatchingDirectories(nodeArray, _filePath) {
   var matches = [];
@@ -225,7 +225,7 @@ function formatTrailingDirectory(pathArray) {
  * Takes a path segment (directory name) and adds it to a blacklist of directories
  * @param  {String, Array[String]} pathSegment [Directory Name(s) (to ignore)]
  * @param  {Array[String]}         ignored     [List of directory names to ignore when searching]
- * @return {undefined}                         [Side-effects only (mutates `ignored` argument)]
+ * @returns {undefined}                         [Side-effects only (mutates `ignored` argument)]
  */
 function ignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
@@ -257,7 +257,7 @@ function isRootPath(filePath) {
 /**
  * Determines if a pathSegment is a reference to the root directory
  * @param  {String}  pathSegment [A directory name (path segment)]
- * @return {Boolean}             [Determines if the pathSegment string is a reference to the root]
+ * @returns {Boolean}             [Determines if the pathSegment string is a reference to the root]
  */
 function isRootSegment(pathSegment) {
   switch (pathSegment) {
@@ -277,7 +277,7 @@ function isRootSegment(pathSegment) {
 /**
  * Prepends the root directory symbol to all directories in the project
  * @param  {Array[String]} node [A relative filepath split on the system-separator]
- * @return {Array[String]}      [A project-root-relative path split on the system-separator]
+ * @returns {Array[String]}      [A project-root-relative path split on the system-separator]
  */
 function prependRoot(node) {
   if (node[0] !== '~') node.unshift('~');
@@ -287,14 +287,14 @@ function prependRoot(node) {
 /**
  * Returns a proxy of the parent module's `module.require` function
  * @param  {PathWizard (Object)} wizard [PathWizard instance for proxy-ing]
- * @return {Proxy (Object)}             [A proxy of the invoking module's `module.require`]
+ * @returns {Proxy (Object)}             [A proxy of the invoking module's `module.require`]
  */
 function proxifyPathWizard(wizard) {
   return new Proxy(module.parent.require, {
     apply: function apply(target, thisArg, argumentList) {
       return requireModule.apply(undefined, [wizard.abs.bind(wizard)].concat(_toConsumableArray(argumentList)));
     },
-    get: function get(target, property, receiver) {
+    get: function get(target, property) {
       switch (property) {
         case 'abs':
           return wizard.abs.bind(wizard);
@@ -329,7 +329,7 @@ function proxifyPathWizard(wizard) {
  * @param  {Array[Array[String]]} ignoredArray [Directory names to ignore]
  * @param  {String}               directory    [Current directory name to process]
  * @param  {Array[Array[String]]} nodesArray   [Accumulator of directories found during traversal]
- * @return {Array[Array[String]]}              [Array of directories in the PathWizard's root directory]
+ * @returns {Array[Array[String]]}              [Array of directories in the PathWizard's root directory]
  */
 function traverse() {
   var rootPath = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : process.cwd();
@@ -363,7 +363,7 @@ function traverse() {
  * 
  * @param  {Function}              findingFunction [PathWizard Instance `abs` method]
  * @param  {String, Array[String]} filePath        [Shortest unique path search expression]
- * @return {Variable (Module)}                     [Module.exports of matched module]
+ * @returns {Variable (Module)}                     [Module.exports of matched module]
  */
 function requireModule(findingFunction, filePath) {
   checkSearchTerm(filePath, 'requireModule');
@@ -381,7 +381,7 @@ function requireModule(findingFunction, filePath) {
  * Takes a path segment (directory name) and removes it from the blacklist of directories
  * @param  {String, Array[String]} pathSegment [Directory Name(s) (to ignore)]
  * @param  {Array[String]}         ignored     [List of directory names to ignore when searching]
- * @return {undefined}                         [Side-effects only (mutates `ignored` argument)]
+ * @returns {undefined}                         [Side-effects only (mutates `ignored` argument)]
  */
 function unignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {

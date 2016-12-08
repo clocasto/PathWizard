@@ -184,8 +184,8 @@ describe('PathWizard', function() {
 
       referenceIngoredPaths.slice().forEach(pw.unignore);
       expect(ignoredPaths).to.eql([]);
-      referenceIngoredPaths.slice().forEach(pw.unignore);
-      expect(ignoredPaths).to.eql([]);
+      referenceIngoredPaths.slice().forEach(pw.ignore);
+      expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
     })
 
     it(`Using the 'unignore' method`, function() {
