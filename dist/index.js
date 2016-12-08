@@ -294,7 +294,7 @@ function proxifyPathWizard(wizard) {
     apply: function apply(target, thisArg, argumentList) {
       return requireModule.apply(undefined, [wizard.abs.bind(wizard)].concat(_toConsumableArray(argumentList)));
     },
-    get: function get(target, property, receiver) {
+    get: function get(target, property) {
       switch (property) {
         case 'abs':
           return wizard.abs.bind(wizard);
