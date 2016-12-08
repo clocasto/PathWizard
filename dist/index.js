@@ -16,7 +16,6 @@ if (require.cache && __filename) delete require.cache[__filename];
 
 function PathWizardModule() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var func = arguments[1];
 
   if (options.root && typeof options.root !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
   var _PathWizard = new PathWizard(options);
@@ -152,6 +151,7 @@ var PathWizard = function () {
     key: 'ignore',
     value: function ignore(expressions) {
       ignorePath(expressions, this.ignored);
+      this.nodes = traverse(this.root, this.ignored);
       return proxifyPathWizard(this);
     }
 
@@ -166,6 +166,7 @@ var PathWizard = function () {
     key: 'unignore',
     value: function unignore(expressions) {
       unignorePath(expressions, this.ignored);
+      this.nodes = traverse(this.root, this.ignored);
       return proxifyPathWizard(this);
     }
   }]);

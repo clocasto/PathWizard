@@ -4,8 +4,8 @@ const path = require('path');
 const PathWizard = require('../dist');
 const expect = chai.expect;
 
-let _root,
-  _root_a,
+let _root = path.join(__dirname, './test-folder');
+let _root_a,
   _root_b,
   _root_c,
   _root_routes,
@@ -172,19 +172,19 @@ describe('PathWizard', function() {
     let pw;
 
     beforeEach(() => {
-      pw = PathWizard({ cache: false });
+      pw = PathWizard({ cache: false, root: _root });
     });
 
     it(`Using the 'ignore' method`, function() {
       expect(pw.ignore).to.be.an.instanceof(Function);
 
       const ignoredPaths = pw.ignored;
-      const referenceIngoredPaths = ignoredPaths.slice();
+      const referenceIngoredPaths = ['a', 'b', 'c'];
       expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
 
-      referenceIngoredPaths.slice().forEach(pw.unignore);
-      expect(ignoredPaths).to.eql([]);
-      referenceIngoredPaths.slice().forEach(pw.ignore);
+      referenceIngoredPaths.forEach(pw.ignore);
+      expect(ignoredPaths).to.eql(['node_modules', 'bower_components', 'a', 'b', 'c']);
+      referenceIngoredPaths.forEach(pw.unignore);
       expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
     })
 
@@ -194,9 +194,9 @@ describe('PathWizard', function() {
       const ignoredPaths = pw.ignored;
       expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
 
-      pw.unignore('node_modules');
+      pw.unignore('bower_components');
 
-      expect(ignoredPaths.includes('node_modules')).to.be.false;
+      expect(ignoredPaths.includes('bower_components')).to.be.false;
     })
 
     it(`Without Error if No Results are Found or if the Ignored State is Empty`, function() {
@@ -204,8 +204,6 @@ describe('PathWizard', function() {
       const referenceIngoredPaths = ignoredPaths.slice();
       expect(ignoredPaths).to.eql(['node_modules', 'bower_components']);
 
-      referenceIngoredPaths.forEach(pw.unignore);
-      expect(ignoredPaths).to.eql([]);
       referenceIngoredPaths.forEach(pw.unignore);
       expect(ignoredPaths).to.eql([]);
     })
@@ -224,7 +222,7 @@ describe('PathWizard', function() {
     })
 
     it(`Using the 'ignore' option in the PathWizard constructor`, function() {
-      pw = PathWizard({ cache: false, ignored: [] });
+      pw = PathWizard({ ignored: [], root: _root });
       expect(pw.ignored).to.eql([]);
 
       pw.ignore('node_modules');
@@ -234,7 +232,7 @@ describe('PathWizard', function() {
     })
 
     it(`Chaining a search after the ignore`, function() {
-      pw = PathWizard({ cache: false, ignored: [] });
+      pw = PathWizard({ ignored: [], root: _root });
 
       //This should NOT cause require chai to fail. This should prevent file matches in node_modules/
       const chaiModule = pw.ignore(['node_modules'])('chai');
@@ -250,7 +248,7 @@ describe('PathWizard', function() {
     })
 
     it(`Chaining a search after the unignore`, function() {
-      pw = PathWizard({ cache: false, ignored: ['node_modules', 'a'] });
+      pw = PathWizard({ ignored: ['node_modules', 'a'], root: _root });
 
       //This should NOT cause require chai to fail. This should prevent file matches in node_modules/
       const chaiModule = pw.unignore(['node_modules'])('chai');
@@ -267,7 +265,7 @@ describe('PathWizard', function() {
     })
 
     it(`from arrays of ignore terms`, function() {
-      pw = PathWizard({ cache: false, ignored: [] });
+      pw = PathWizard({ ignored: [], root: _root });
 
       pw.ignore(['node_modules']);
       expect(pw.ignored).to.eql(['node_modules']);
@@ -289,7 +287,7 @@ describe('PathWizard', function() {
     })
 
     it(`won't search in ignored directories`, function() {
-      pw = PathWizard({ cache: false });
+      pw = PathWizard({ root: _root });
 
       pw.ignore(['a', 'b', 'c']);
       expect(pw.ignored).to.eql(['node_modules', 'bower_components', 'a', 'b', 'c']);
@@ -299,7 +297,7 @@ describe('PathWizard', function() {
     })
 
     it(`and can handle incorrect search term types`, function() {
-      pw = PathWizard({ cache: false, ignored: [] });
+      pw = PathWizard({ cache: false, ignored: [], root: _root });
 
       pw.ignore('');
       pw.ignore(['']);
@@ -342,7 +340,7 @@ describe('PathWizard', function() {
   })
 
   describe('Can, For Absolute Paths,', function() {
-    const pw = PathWizard({ cache: false, root: path.join(__dirname, 'test-folder') });
+    const pw = PathWizard({ cache: false, root: _root });
 
     describe('Handle Invalid Arguments', function() {
 
