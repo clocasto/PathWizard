@@ -23,7 +23,7 @@ class PathWizard {
   /**
    * Search Method - Finds absolute path to the file matching the search expression argument
    * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-   * @return {String}                         [absolute path to the matching module]
+   * @returns {String}                         [absolute path to the matching module]
    */
   abs(filePath) {
     checkSearchTerm(filePath, 'rel');
@@ -59,7 +59,7 @@ class PathWizard {
    * Search Method - Finds relative path from invoking file to the file matching the 
    * search expression argument
    * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-   * @return {String}                         [relative path to the matching module]
+   * @returns {String}                         [relative path to the matching module]
    */
   rel(filePath) {
     const _to = path.normalize(this.abs(filePath));
@@ -72,7 +72,7 @@ class PathWizard {
   /**
    * Search Method - Finds absolute path to the folder matching the search expression argument
    * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-   * @return {String}                         [absolute path to the matching folder]
+   * @returns {String}                         [absolute path to the matching folder]
    */
   absDir(filePath) {
     checkSearchTerm(filePath, 'absDir');
@@ -98,7 +98,7 @@ class PathWizard {
    * Search Method - Finds relative path from invoking file to the folder matching the 
    * search expression argument
    * @param  {String, Array[String]} filePath [shortest unique path (search expression)]
-   * @return {String}                         [relative path to the matching module]
+   * @returns {String}                         [relative path to the matching module]
    */
   relDir(filePath) {
     const to = path.normalize(this.absDir(filePath));
@@ -110,22 +110,22 @@ class PathWizard {
   /**
    * Helper Method - Expression(s) passed to `ignore` won't be searched through
    * @param  {String, Array[String]} expressions [directory name(s) to ignore during searching]
-   * @return {Object}                            [this (PathWizard instance)]
+   * @returns {Object}                            [proxified PathWizard instance]
    */
   ignore(expressions) {
     ignorePath(expressions, this.ignored);
-    return this;
+    return proxifyPathWizard(this);
   }
 
   /**
    * Helper Method - Expression(s) passed to `unignore` will be removed from the ignored 
    * directory names
    * @param  {String, Array[String]} expressions [directory name(s) to unignore]
-   * @return {Object}                            [this (PathWizard instance)]
+   * @returns {Object}                            [proxified PathWizard instance]
    */
   unignore(expressions) {
     unignorePath(expressions, this.ignored);
-    return this;
+    return proxifyPathWizard(this);
   }
 }
 

@@ -14,7 +14,7 @@ function err(rootPath, filePath, matches) {
  * Searches through a list of directories and finds matches with the search expression
  * @param  {Array[Array[String]]} nodeArray [List of all project directories, broken into arrays segments]
  * @param  {Array[String]}        _filePath [Search Expression - Array of path segments]
- * @return {Array[Array[String]]}           [Array of all matching directory paths]
+ * @returns {Array[Array[String]]}           [Array of all matching directory paths]
  */
 function findMatchingDirectories(nodeArray, _filePath) {
   const matches = [];
@@ -47,7 +47,7 @@ function formatTrailingDirectory(pathArray) {
  * Takes a path segment (directory name) and adds it to a blacklist of directories
  * @param  {String, Array[String]} pathSegment [Directory Name(s) (to ignore)]
  * @param  {Array[String]}         ignored     [List of directory names to ignore when searching]
- * @return {undefined}                         [Side-effects only (mutates `ignored` argument)]
+ * @returns {undefined}                         [Side-effects only (mutates `ignored` argument)]
  */
 function ignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
@@ -77,7 +77,7 @@ function isRootPath(filePath) {
 /**
  * Determines if a pathSegment is a reference to the root directory
  * @param  {String}  pathSegment [A directory name (path segment)]
- * @return {Boolean}             [Determines if the pathSegment string is a reference to the root]
+ * @returns {Boolean}             [Determines if the pathSegment string is a reference to the root]
  */
 function isRootSegment(pathSegment) {
   switch (pathSegment) {
@@ -97,7 +97,7 @@ function isRootSegment(pathSegment) {
 /**
  * Prepends the root directory symbol to all directories in the project
  * @param  {Array[String]} node [A relative filepath split on the system-separator]
- * @return {Array[String]}      [A project-root-relative path split on the system-separator]
+ * @returns {Array[String]}      [A project-root-relative path split on the system-separator]
  */
 function prependRoot(node) {
   if (node[0] !== '~') node.unshift('~');
@@ -107,7 +107,7 @@ function prependRoot(node) {
 /**
  * Returns a proxy of the parent module's `module.require` function
  * @param  {PathWizard (Object)} wizard [PathWizard instance for proxy-ing]
- * @return {Proxy (Object)}             [A proxy of the invoking module's `module.require`]
+ * @returns {Proxy (Object)}             [A proxy of the invoking module's `module.require`]
  */
 function proxifyPathWizard(wizard) {
   return new Proxy(module.parent.require, {
@@ -147,7 +147,7 @@ function proxifyPathWizard(wizard) {
  * @param  {Array[Array[String]]} ignoredArray [Directory names to ignore]
  * @param  {String}               directory    [Current directory name to process]
  * @param  {Array[Array[String]]} nodesArray   [Accumulator of directories found during traversal]
- * @return {Array[Array[String]]}              [Array of directories in the PathWizard's root directory]
+ * @returns {Array[Array[String]]}              [Array of directories in the PathWizard's root directory]
  */
 function traverse(rootPath = process.cwd(), ignoredArray, directory = '', nodesArray = []) {
   const nodes = fs.readdirSync(path.join(rootPath, directory))
@@ -179,7 +179,7 @@ function traverse(rootPath = process.cwd(), ignoredArray, directory = '', nodesA
  * 
  * @param  {Function}              findingFunction [PathWizard Instance `abs` method]
  * @param  {String, Array[String]} filePath        [Shortest unique path search expression]
- * @return {Variable (Module)}                     [Module.exports of matched module]
+ * @returns {Variable (Module)}                     [Module.exports of matched module]
  */
 function requireModule(findingFunction, filePath) {
   checkSearchTerm(filePath, 'requireModule');
@@ -197,7 +197,7 @@ function requireModule(findingFunction, filePath) {
  * Takes a path segment (directory name) and removes it from the blacklist of directories
  * @param  {String, Array[String]} pathSegment [Directory Name(s) (to ignore)]
  * @param  {Array[String]}         ignored     [List of directory names to ignore when searching]
- * @return {undefined}                         [Side-effects only (mutates `ignored` argument)]
+ * @returns {undefined}                         [Side-effects only (mutates `ignored` argument)]
  */
 function unignorePath(pathSegment, ignored) {
   if (Array.isArray(pathSegment)) {
