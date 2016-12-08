@@ -54,7 +54,7 @@ Given the following project folder structure:
 Shortest Unique Filepath Results (based on the `abs` method):
 
 Search String | Output | Status
----------------------|-------------|------------
+:---------------------|:-------------|:------------
 `'g'` or `'g.js'`          | `'/test-folder/c/c/g.js'`  | Success!
 `'c/c'`, `'c/c/c'` or `'c'`| `'/test-folder/c/c/c.js'`  | Success!
 `'index'` or `'index.js'`  | `throw new Error()`. | Index is not a unique path.  
@@ -81,13 +81,13 @@ Search String | Output | Status
 
 ## API and Methods
 
-#### Invocation(filePathExpression)  
+### Invocation(filePathExpression)  
 The function returned by `require('pathwizard')` behaves similarly to node.js' `require`. The difference is that it will find files based on the shortest unique path segment in addition to requiring modules by name, absolute path, or relative path.  
 
 *Example:*  
 `pw('server/api'); // Loads the module.exports of the matching 'server/api.js' or 'server/api/index.js' file`  
-***
-#### abs(filePathExpression)  
+
+### abs(filePathExpression)  
 > @param filePathExpression {String, Array[String]} [shortest unique path (search expression)]  
 > @returns {String} [absolute path to the matching module]  
 
@@ -95,8 +95,8 @@ This method returns the absolute path of a matching **file**. This method does *
 
 *Example:*  
 `pw.abs('server/db'); // Returns absolute path to the matching server/db file`  
-***
-#### rel(filePathExpression)  
+
+### rel(filePathExpression)  
 > @param filePathExpression {String, Array[String]} [shortest unique path (search expression)]  
 > @returns {String} [relative path to the matching module]  
 
@@ -104,8 +104,8 @@ This method returns the relative path *from the file invoking 'rel'* to the matc
 
 *Example:*  
 `pw.rel('server/db'); // Returns relative path from the invoking file to the matching 'db.js' or 'db/index.js' file`  
-***
-#### absDir(folderPathExpression)  
+
+### absDir(folderPathExpression)  
 > @param folderPathExpression {String, Array[String]} [shortest unique path (search expression)]  
 > @returns {String} [absolute path to the matching module]  
 
@@ -113,8 +113,8 @@ This method returns the absolute path of a matching *folder*. This method does *
 
 *Example:*  
 `pw.absDir('server/config'); // Returns absolute path to the matching 'config' folder directory`  
-***
-#### relDir(folderPathExpression)  
+
+### relDir(folderPathExpression)  
 > @param folderPathExpression {String, Array[String]} [shortest unique path (search expression)]  
 > @returns {String} [relative path to the matching module]  
 
@@ -122,8 +122,8 @@ This method returns the relative path of a matching *folder*. This method does *
 
 *Example:*  
 `pw.relDir('server/db/schema'); // Returns relative path to the matching 'schema' folder directory` 
-***
-#### ignore(directoryNamesToIgnore)   
+
+### ignore(directoryNamesToIgnore)   
 > @param directoryNamesToIgnore {String, Array[String]} [directory name(s) to ignore during searching]
 > @returns {Object} [proxified PathWizard instance]  
 
@@ -131,8 +131,8 @@ This method adds the provided directory name, or array of directory names, (note
 
 *Example:*  
 `pw.ignore('client'); // Adds the directory name, 'client', to the list of path segments to ignore when traversing the file system` 
-***
-#### unignore(directoryNamesToUnignore)  
+
+### unignore(directoryNamesToUnignore)  
 > @param directoryNamesToUnignore {String, Array[String]} [directory name(s) to unignore during searching]
 > @returns {Object} [proxified PathWizard instance]  
 
