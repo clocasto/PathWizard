@@ -54,12 +54,13 @@ describe('PathWizard', function() {
     fse.mkdirSync(_root_c_c);
 
     _root_a_ajs = path.join(_root_a_a, 'a.js');
+    fse.writeFileSync(_root_a_ajs, `module.exports = '${_root_a_ajs}'`);
 
     _root_indexjs = path.join(_root, 'index.js');
     fse.writeFileSync(_root_indexjs, `${_root_indexjs}`);
 
     _root_appjs = path.join(_root, 'app.js');
-    fse.writeFileSync(_root_appjs, `${_root_appjs}`)
+    fse.writeFileSync(_root_appjs, `'${_root_appjs}'`)
 
     _root_userrouterjs = path.join(_root, 'user.router.js');
     fse.writeFileSync(_root_userrouterjs, `module.exports = '${_root_userrouterjs}'`);
@@ -230,6 +231,39 @@ describe('PathWizard', function() {
       expect(pw.ignored).to.eql(['node_modules']);
       pw.unignore('node_modules');
       expect(pw.ignored).to.eql([]);
+    })
+
+    it(`Chaining a search after the ignore`, function() {
+      pw = PathWizard({ cache: false, ignored: [] });
+
+      //This should NOT cause require chai to fail. This should prevent file matches in node_modules/
+      const chaiModule = pw.ignore(['node_modules'])('chai');
+
+      expect(pw.ignored).to.eql(['node_modules']);
+      expect(chaiModule).to.equal(require('chai'));
+
+      expect(pw.abs('a')).to.eql(_root_a_ajs);
+      const pwWithoutA = pw.ignore('a');
+      expect(pwWithoutA.bind(pwWithoutA, 'a.js')).to.throw;
+      expect(pw.ignored).to.eql(['node_modules', 'a']);
+      expect(pwWithoutA.cache).to.equal(pw.cache);
+    })
+
+    it(`Chaining a search after the unignore`, function() {
+      pw = PathWizard({ cache: false, ignored: ['node_modules', 'a'] });
+
+      //This should NOT cause require chai to fail. This should prevent file matches in node_modules/
+      const chaiModule = pw.unignore(['node_modules'])('chai');
+
+      expect(pw.ignored).to.eql(['a']);
+      expect(chaiModule).to.equal(require('chai'));
+
+      expect(pw.abs.bind(pw, 'a')).to.throw;
+      const pwWithA = pw.unignore('a').ignore(['node_modules']);
+      expect(pw.ignored).to.eql(['node_modules']);
+      expect(pwWithA('a.js')).to.eql(_root_a_ajs);
+      expect(pw.ignored).to.eql(['node_modules']);
+      expect(pwWithA.cache).to.equal(pw.cache);
     })
 
     it(`from arrays of ignore terms`, function() {

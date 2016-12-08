@@ -152,7 +152,7 @@ var PathWizard = function () {
     key: 'ignore',
     value: function ignore(expressions) {
       ignorePath(expressions, this.ignored);
-      return this;
+      return proxifyPathWizard(this);
     }
 
     /**
@@ -166,7 +166,7 @@ var PathWizard = function () {
     key: 'unignore',
     value: function unignore(expressions) {
       unignorePath(expressions, this.ignored);
-      return this;
+      return proxifyPathWizard(this);
     }
   }]);
 
@@ -294,7 +294,7 @@ function proxifyPathWizard(wizard) {
     apply: function apply(target, thisArg, argumentList) {
       return requireModule.apply(undefined, [wizard.abs.bind(wizard)].concat(_toConsumableArray(argumentList)));
     },
-    get: function get(target, property) {
+    get: function get(target, property, receiver) {
       switch (property) {
         case 'abs':
           return wizard.abs.bind(wizard);

@@ -114,7 +114,7 @@ class PathWizard {
    */
   ignore(expressions) {
     ignorePath(expressions, this.ignored);
-    return this;
+    return proxifyPathWizard(this);
   }
 
   /**
@@ -125,7 +125,7 @@ class PathWizard {
    */
   unignore(expressions) {
     unignorePath(expressions, this.ignored);
-    return this;
+    return proxifyPathWizard(this);
   }
 }
 

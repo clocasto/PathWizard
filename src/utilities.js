@@ -112,7 +112,7 @@ function prependRoot(node) {
 function proxifyPathWizard(wizard) {
   return new Proxy(module.parent.require, {
     apply: (target, thisArg, argumentList) => requireModule(wizard.abs.bind(wizard), ...argumentList),
-    get: (target, property) => {
+    get: (target, property, receiver) => {
       switch (property) {
         case 'abs':
           return wizard.abs.bind(wizard);
