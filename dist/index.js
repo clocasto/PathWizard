@@ -145,28 +145,28 @@ var PathWizard = function () {
     /**
      * Helper Method - Expression(s) passed to `ignore` won't be searched through
      * @param  {String, Array[String]} expressions [directory name(s) to ignore during searching]
-     * @return {Object}                            [this (PathWizard instance)]
+     * @return {Object}                            [proxified PathWizard instance]
      */
 
   }, {
     key: 'ignore',
     value: function ignore(expressions) {
       ignorePath(expressions, this.ignored);
-      return this;
+      return proxifyPathWizard(this);
     }
 
     /**
      * Helper Method - Expression(s) passed to `unignore` will be removed from the ignored 
      * directory names
      * @param  {String, Array[String]} expressions [directory name(s) to unignore]
-     * @return {Object}                            [this (PathWizard instance)]
+     * @return {Object}                            [proxified PathWizard instance]
      */
 
   }, {
     key: 'unignore',
     value: function unignore(expressions) {
       unignorePath(expressions, this.ignored);
-      return this;
+      return proxifyPathWizard(this);
     }
   }]);
 
