@@ -158,5 +158,5 @@ MIT (See license.txt)
 
 ## <a href="release-history"></a>Release History
 
-* 1.0.2
+* [1.0.2](https://github.com/clocasto/pathwizard/pull/18)
 * [1.0.1](https://github.com/clocasto/pathwizard/pull/13)
