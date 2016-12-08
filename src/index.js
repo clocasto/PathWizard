@@ -6,7 +6,7 @@ module.exports = PathWizardModule;
 //Prevents PathWizard from being cached in require.cache - enables `rel` method functionality
 if (require.cache && __filename) delete require.cache[__filename];
 
-function PathWizardModule(options = {}, func) {
+function PathWizardModule(options = {}) {
   if (options.root && typeof options.root !== 'string') throw new Error('PathWizard constructor only accepts undefined or a string-typed project directory.');
   const _PathWizard = new PathWizard(options);
   return proxifyPathWizard(_PathWizard);
@@ -114,6 +114,7 @@ class PathWizard {
    */
   ignore(expressions) {
     ignorePath(expressions, this.ignored);
+    this.nodes = traverse(this.root, this.ignored);
     return proxifyPathWizard(this);
   }
 
@@ -125,6 +126,7 @@ class PathWizard {
    */
   unignore(expressions) {
     unignorePath(expressions, this.ignored);
+    this.nodes = traverse(this.root, this.ignored);
     return proxifyPathWizard(this);
   }
 }
